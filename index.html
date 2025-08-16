@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <title>Jumapel Nads | Checker</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+      color: #fff;
+      overflow: hidden; /* убираем скролл */
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 48px;
+      margin: 10px 0;
+      color: #4b0082;
+    }
+
+    /* чекер */
+    .checker-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    #walletInput {
+      width: 300px;
+      padding: 12px 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
+
+    #checkBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .beret-btn {
+      width: 140px;
+      transition: transform 0.2s ease;
+    }
+    .beret-btn:hover {
+      transform: scale(1.05) rotate(-2deg);
+    }
+
+    #result {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* билет выше и без фона */
+    .ticket {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      position: relative;
+      z-index: 2; /* выше монстров */
+    }
+    .ticket img {
+      max-height: 40vh; /* компактнее, чтобы не пересекалось */
+      max-width: 80%;
+      border-radius: 20px;
+      animation: float 4s ease-in-out infinite, glow 3s ease-in-out infinite;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 25px rgba(255,255,255,0.3); }
+      50% { box-shadow: 0 0 45px rgba(255,255,255,0.6); }
+    }
+
+    /* монстры снизу */
+    .bottom-monsters {
+      position: fixed;
+      bottom: -15%; /* выглядывают */
+      width: 100%;
+      height: 60vh;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 1;
+    }
+
+    .monster {
+      position: relative;
+      height: 100%;
+    }
+    .monster img {
+      height: 100%;
+      transform-origin: bottom center;
+      animation: monsterPeek 5s ease-in-out infinite;
+    }
+
+    /* центральный отдельно */
+    .monster.center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 100%;
+    }
+    .monster.center img {
+      animation: monsterPeekCenter 5s ease-in-out infinite;
+    }
+
+    /* анимации выглядывания */
+    @keyframes monsterPeek {
+      0%, 100% { transform: translateY(15%) rotate(0deg); }
+      50% { transform: translateY(0) rotate(3deg); }
+    }
+
+    @keyframes monsterPeekCenter {
+      0%, 100% { transform: translateY(20%) scale(1); }
+      50% { transform: translateY(0) scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Jumapel Nads</h1>
+
+  <!-- чекер -->
+  <div class="checker-wrapper">
+    <input type="text" id="walletInput" placeholder="Введи адрес кошелька">
+    <button id="checkBtn" onclick="checkWallet()">
+      <img src="bar_out_18.png" alt="Берет" class="beret-btn">
+    </button>
+  </div>
+  <div id="result"></div>
+
+  <!-- билет -->
+  <div class="ticket">
+    <img src="haha_20.png" alt="JumapelPass">
+  </div>
+
+  <!-- монстры -->
+  <div class="bottom-monsters">
+    <div class="monster left">
+      <img src="game7.png" alt="Монстр слева">
+    </div>
+    <div class="monster center">
+      <img src="game6.png" alt="Монстр центр">
+    </div>
+    <div class="monster right">
+      <img src="game8.png" alt="Монстр справа">
+    </div>
+  </div>
+
+<script>
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
+let whitelist = [];
+
+async function loadWhitelist() {
+  try {
+    const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(SHEET_URL));
+    const csvText = await res.text();
+    whitelist = csvText.split("\n")
+      .map(line => line.split(",")[0])
+      .map(addr => addr.trim().replace(/['"]/g, "").toLowerCase())
+      .filter(addr => addr.length > 0);
+  } catch (err) {
+    document.getElementById("result").innerText = "Ошибка загрузки whitelist 😢";
+  }
+}
+
+function checkWallet() {
+  const input = document.getElementById("walletInput").value.trim().toLowerCase();
+  const resultEl = document.getElementById("result");
+  if (!input) {
+    resultEl.innerText = "Введите адрес!";
+    resultEl.style.color = "#ffaaaa";
+    return;
+  }
+  if (whitelist.includes(input)) {
+    resultEl.innerText = "✅ Адрес есть в whitelist!";
+    resultEl.style.color = "#0f0";
+  } else {
+    resultEl.innerText = "❌ Адреса нет в whitelist.";
+    resultEl.style.color = "#f55";
+  }
+}
+
+document.getElementById("walletInput").addEventListener("keypress", e => {
+  if (e.key === "Enter") checkWallet();
+});
+
+loadWhitelist();
+</script>
+
+</body>
+</html>
