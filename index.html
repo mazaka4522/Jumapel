@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <title>Jumapel Nads | Checker</title>
@@ -11,17 +11,17 @@
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
       color: #fff;
-      overflow: hidden; /* убираем скролл */
+      overflow: hidden;
     }
 
     h1 {
       text-align: center;
       font-size: 48px;
       margin: 10px 0;
-      color: #4b0082;
+      color: red; /* красная надпись */
     }
 
-    /* чекер */
+    /* checker */
     .checker-wrapper {
       display: flex;
       justify-content: center;
@@ -61,35 +61,84 @@
       font-weight: bold;
     }
 
-    /* билет выше и без фона */
+    /* flying tickets */
     .ticket {
-      display: flex;
-      justify-content: center;
-      margin-top: 20px;
-      position: relative;
-      z-index: 2; /* выше монстров */
+      position: absolute;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 2;
     }
     .ticket img {
-      max-height: 40vh; /* компактнее, чтобы не пересекалось */
-      max-width: 80%;
-      border-radius: 20px;
-      animation: float 4s ease-in-out infinite, glow 3s ease-in-out infinite;
+      width: 120px;
+      animation: flyUp 6s linear infinite;
+    }
+    @keyframes flyUp {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-110vh) translateX(100px) rotate(360deg); opacity: 0; }
     }
 
-    @keyframes float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
+    /* flying berets */
+    .beret-fly {
+      position: absolute;
+      bottom: -100px;
+      z-index: 1;
+    }
+    .beret-fly img {
+      width: 100px;
+      animation: flyBeret 8s linear infinite;
+    }
+    @keyframes flyBeret {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-120vh) translateX(-150px) rotate(-720deg); opacity: 0; }
     }
 
-    @keyframes glow {
-      0%, 100% { box-shadow: 0 0 25px rgba(255,255,255,0.3); }
-      50% { box-shadow: 0 0 45px rgba(255,255,255,0.6); }
+    /* bubbles */
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      animation: bubbleFloat 12s linear infinite;
+    }
+    @keyframes bubbleFloat {
+      0% { transform: translateY(0) scale(1); opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
     }
 
-    /* монстры снизу */
+    /* shadow monsters */
+    .shadow-monsters {
+      position: fixed;
+      bottom: -12%;
+      width: 100%;
+      height: 65vh;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 0; /* под всем */
+      opacity: 0.4;
+    }
+    .shadow img {
+      height: 100%;
+      filter: grayscale(1) brightness(0.3) blur(2px);
+      opacity: 0.7;
+    }
+    .shadow.center img {
+      animation: shadowFloat 10s ease-in-out infinite;
+    }
+    @keyframes shadowFloat {
+      0%, 100% { transform: translateY(5%); }
+      50% { transform: translateY(-5%); }
+    }
+
+    /* main monsters */
     .bottom-monsters {
       position: fixed;
-      bottom: -15%; /* выглядывают */
+      bottom: -15%;
       width: 100%;
       height: 60vh;
       pointer-events: none;
@@ -98,7 +147,6 @@
       align-items: flex-end;
       z-index: 1;
     }
-
     .monster {
       position: relative;
       height: 100%;
@@ -108,8 +156,6 @@
       transform-origin: bottom center;
       animation: monsterPeek 5s ease-in-out infinite;
     }
-
-    /* центральный отдельно */
     .monster.center {
       position: absolute;
       left: 50%;
@@ -119,13 +165,10 @@
     .monster.center img {
       animation: monsterPeekCenter 5s ease-in-out infinite;
     }
-
-    /* анимации выглядывания */
     @keyframes monsterPeek {
       0%, 100% { transform: translateY(15%) rotate(0deg); }
       50% { transform: translateY(0) rotate(3deg); }
     }
-
     @keyframes monsterPeekCenter {
       0%, 100% { transform: translateY(20%) scale(1); }
       50% { transform: translateY(0) scale(1.05); }
@@ -136,36 +179,68 @@
 
   <h1>Jumapel Nads</h1>
 
-  <!-- чекер -->
+  <!-- checker -->
   <div class="checker-wrapper">
-    <input type="text" id="walletInput" placeholder="Введи адрес кошелька">
+    <input type="text" id="walletInput" placeholder="Enter wallet address">
     <button id="checkBtn" onclick="checkWallet()">
-      <img src="bar_out_18.png" alt="Берет" class="beret-btn">
+      <img src="bar_out_18.png" alt="Beret" class="beret-btn">
     </button>
   </div>
   <div id="result"></div>
 
-  <!-- билет -->
-  <div class="ticket">
-    <img src="haha_20.png" alt="JumapelPass">
+  <!-- flying tickets -->
+  <div class="ticket" style="left:30%; animation-delay:1s;">
+    <img src="haha_20.png" alt="Ticket">
+  </div>
+  <div class="ticket" style="left:70%; animation-delay:3s;">
+    <img src="haha_20.png" alt="Ticket">
   </div>
 
-  <!-- монстры -->
+  <!-- flying berets -->
+  <div class="beret-fly" style="left:20%; animation-delay:2s;">
+    <img src="bar_out_18.png" alt="Flying Beret">
+  </div>
+  <div class="beret-fly" style="left:60%; animation-delay:5s;">
+    <img src="bar_out_18.png" alt="Flying Beret">
+  </div>
+
+  <!-- bubbles -->
+  <div class="bubble" style="left:10%; animation-duration:15s;"></div>
+  <div class="bubble" style="left:50%; animation-duration:12s;"></div>
+  <div class="bubble" style="left:80%; animation-duration:18s;"></div>
+
+  <!-- shadow monsters -->
+  <div class="shadow-monsters">
+    <div class="shadow left">
+      <img src="game7.png" alt="Shadow monster left">
+    </div>
+    <div class="shadow center">
+      <img src="game6.png" alt="Shadow monster center">
+    </div>
+    <div class="shadow right">
+      <img src="game8.png" alt="Shadow monster right">
+    </div>
+  </div>
+
+  <!-- main monsters -->
   <div class="bottom-monsters">
     <div class="monster left">
-      <img src="game7.png" alt="Монстр слева">
+      <img src="game7.png" alt="Monster left">
     </div>
     <div class="monster center">
-      <img src="game6.png" alt="Монстр центр">
+      <img src="game6.png" alt="Monster center">
     </div>
     <div class="monster right">
-      <img src="game8.png" alt="Монстр справа">
+      <img src="game8.png" alt="Monster right">
     </div>
   </div>
 
 <script>
 const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
 let whitelist = [];
+
+const checkBtn = document.getElementById("checkBtn");
+checkBtn.disabled = true;
 
 async function loadWhitelist() {
   try {
@@ -175,8 +250,9 @@ async function loadWhitelist() {
       .map(line => line.split(",")[0])
       .map(addr => addr.trim().replace(/['"]/g, "").toLowerCase())
       .filter(addr => addr.length > 0);
+    checkBtn.disabled = false;
   } catch (err) {
-    document.getElementById("result").innerText = "Ошибка загрузки whitelist 😢";
+    document.getElementById("result").innerText = "Whitelist load error 😢";
   }
 }
 
@@ -184,15 +260,15 @@ function checkWallet() {
   const input = document.getElementById("walletInput").value.trim().toLowerCase();
   const resultEl = document.getElementById("result");
   if (!input) {
-    resultEl.innerText = "Введите адрес!";
+    resultEl.innerText = "Enter wallet address!";
     resultEl.style.color = "#ffaaaa";
     return;
   }
   if (whitelist.includes(input)) {
-    resultEl.innerText = "✅ Адрес есть в whitelist!";
+    resultEl.innerText = "✅ Address is in whitelist!";
     resultEl.style.color = "#0f0";
   } else {
-    resultEl.innerText = "❌ Адреса нет в whitelist.";
+    resultEl.innerText = "❌ Address not found in whitelist.";
     resultEl.style.color = "#f55";
   }
 }
@@ -206,3 +282,4 @@ loadWhitelist();
 
 </body>
 </html>
+
