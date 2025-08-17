@@ -196,62 +196,47 @@
 
   document.addEventListener("DOMContentLoaded", startFX);
 
+  <script>
   // ==== Чекер ====
   let whitelist = [];
 
   async function loadWhitelist() {
     try {
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV6NMQZn9fdrGCJ-PGPH1jeuwx0s0CxEc3S_MLlv2RxcZUIINgJ-_fGPlP08L483Qp/exec";
-
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA1YGEufZbbMMkrdUuXP23wGdkbz9ftV-DiLiEB0psYcN_R9AKXRs7CYQburIuyReG/exec";
       const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
-      whitelist = await res.json();
-
+      whitelist = await res.json(); // сразу массив
       console.log("Whitelist loaded:", whitelist);
-
-      // включаем кнопку только после загрузки
-      document.getElementById("checkBtn").disabled = false;
     } catch (err) {
       console.error("Whitelist load error:", err);
-      document.getElementById("result").innerText = "⚠️ Ошибка загрузки whitelist";
+      whitelist = []; // если ошибка, просто пустой список
     }
-  }
-
-  function showResult(message, color) {
-    const resultEl = document.getElementById("result");
-    resultEl.innerText = message;
-    resultEl.style.color = color;
-
-    // простая анимация "подпрыгивания"
-    resultEl.animate([
-      { transform: "scale(1)" },
-      { transform: "scale(1.15)" },
-      { transform: "scale(1)" }
-    ], { duration: 300 });
   }
 
   function checkWallet() {
     const inputEl = document.getElementById("walletInput");
+    const resultEl = document.getElementById("result");
     const input = inputEl.value.trim().toLowerCase();
     inputEl.value = "";
 
     if (!input) {
-      showResult("Enter wallet address!", "#ffaaaa");
+      resultEl.innerText = "Введите адрес!";
+      resultEl.style.color = "#ffaaaa";
       return;
     }
 
     if (whitelist.includes(input)) {
-      showResult("✅ Address is in whitelist!", "#00ff88");
+      resultEl.innerText = "✅ Адрес найден в whitelist!";
+      resultEl.style.color = "#00ff88";
     } else {
-      showResult("❌ Address not found in whitelist.", "#ff6688");
+      resultEl.innerText = "❌ Адрес не найден.";
+      resultEl.style.color = "#ff6688";
     }
   }
 
-  document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById("checkBtn").disabled = true; // кнопка выключена
-    loadWhitelist();
-  });
+  document.addEventListener("DOMContentLoaded", loadWhitelist);
 </script>
   
 </body>
 </html>
+
 
