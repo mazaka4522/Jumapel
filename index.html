@@ -201,7 +201,7 @@
 
   async function loadWhitelist() {
     try {
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhH8yWXzynq2iQ_P9EidxaBy8QmY26t_FiXiwi6gYbbsnlhYuWJ8qRZJKOQzz49sbx/exec";
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwV6NMQZn9fdrGCJ-PGPH1jeuwx0s0CxEc3S_MLlv2RxcZUIINgJ-_fGPlP08L483Qp/exec";
 
       const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
       whitelist = await res.json();
@@ -254,3 +254,4 @@
   
 </body>
 </html>
+
