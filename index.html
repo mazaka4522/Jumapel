@@ -31,11 +31,6 @@
     }
 
     /* ===== Верхняя картинка ===== */
-    .top-image {
-      position: relative;
-      width: 100%;
-      margin: 0 auto 10px auto;
-    }
     .top-image img {
       width: 100%;
       height: auto;
@@ -73,18 +68,13 @@
       cursor: pointer;
       padding: 0;
     }
-    #checkBtn:disabled {
-      opacity: 0.5;
-      pointer-events: none;
-    }
+    #checkBtn:disabled { opacity: 0.5; pointer-events: none; }
     .beret-btn {
       width: 140px;
       transition: transform 0.2s ease;
       display: block;
     }
-    .beret-btn:hover {
-      transform: scale(1.05) rotate(-2deg);
-    }
+    .beret-btn:hover { transform: scale(1.05) rotate(-2deg); }
     #result {
       text-align: center;
       margin-top: 10px;
@@ -111,30 +101,51 @@
     }
     .monsters img,
     .monsters-shadow img {
-      max-height: 55vh; /* все одинаковые крупные */
+      max-height: 55vh;
       width: auto;
     }
-    .monsters-shadow img { animation: shadowFloat 10s ease-in-out infinite; }
-    @keyframes shadowFloat {
-      0%, 100% { transform: translateY(5%); }
-      50% { transform: translateY(-5%); }
-    }
-    .monsters img {
-      transform-origin: bottom center;
-      animation: monsterPeek 6s ease-in-out infinite;
-    }
+    .monsters img { animation: monsterPeek 6s ease-in-out infinite; }
     @keyframes monsterPeek {
       0%, 100% { transform: translateY(15%) rotate(0deg); }
       50% { transform: translateY(0) rotate(3deg); }
+    }
+
+    /* ===== Эффекты (Tickets, Berets, Bubbles) ===== */
+    .fx-container {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      overflow: hidden;
+      pointer-events: none;
+    }
+    .ticket, .beret, .bubble {
+      position: absolute;
+      display: block;
+    }
+    .ticket img, .beret img {
+      width: 40px;
+      opacity: 0.8;
+    }
+    .bubble {
+      width: 20px; height: 20px;
+      border-radius: 50%;
+      background: rgba(255,255,255,0.5);
+      box-shadow: 0 0 10px rgba(255,255,255,0.7);
+    }
+    @keyframes fall {
+      0% { transform: translateY(-10%); opacity: 1; }
+      100% { transform: translateY(110vh); opacity: 0; }
+    }
+    @keyframes rise {
+      0% { transform: translateY(110vh) scale(0.5); opacity: 0.8; }
+      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
     }
   </style>
 </head>
 <body>
   <!-- Верхняя картинка -->
   <div class="stack layer-topimg">
-    <div class="top-image">
-      <img src="foto9.png" alt="Foto9">
-    </div>
+    <div class="top-image"><img src="foto9.png" alt="Foto9"></div>
   </div>
 
   <!-- Чекер -->
@@ -152,17 +163,20 @@
 
   <!-- Тени монстров -->
   <div class="monsters-shadow layer-monsters-shadow">
-    <div class="shadow"><img src="game7.png" alt="Shadow Left"></div>
-    <div class="shadow"><img src="game6.png" alt="Shadow Center"></div>
-    <div class="shadow"><img src="game8.png" alt="Shadow Right"></div>
+    <div><img src="game7.png" alt="Shadow Left"></div>
+    <div><img src="game6.png" alt="Shadow Center"></div>
+    <div><img src="game8.png" alt="Shadow Right"></div>
   </div>
 
   <!-- Монстры -->
   <div class="monsters layer-monsters">
-    <div class="monster"><img src="game7.png" alt="Monster Left"></div>
-    <div class="monster"><img src="game6.png" alt="Monster Center"></div>
-    <div class="monster"><img src="game8.png" alt="Monster Right"></div>
+    <div><img src="game7.png" alt="Monster Left"></div>
+    <div><img src="game6.png" alt="Monster Center"></div>
+    <div><img src="game8.png" alt="Monster Right"></div>
   </div>
+
+  <!-- Эффекты -->
+  <div class="fx-container layer-fx" id="fx"></div>
 
   <script>
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
@@ -179,6 +193,8 @@
       document.getElementById("walletInput").addEventListener("keypress", e => {
         if (e.key === "Enter") checkWallet();
       });
+
+      startFX(); // запустить эффекты
     });
 
     async function loadWhitelist() {
@@ -194,14 +210,9 @@
           .map(addr => (addr || "").trim().replace(/['"]/g, "").toLowerCase())
           .filter(addr => addr.length > 0);
         whitelist = Array.from(new Set(whitelist));
-        console.log("Whitelist загружен:", whitelist.length, "адресов");
       } catch (err) {
         console.error("Whitelist load error:", err);
-        const resultEl = document.getElementById("result");
-        if (resultEl) {
-          resultEl.innerText = "Whitelist load error 😢";
-          resultEl.style.color = "#ffaaaa";
-        }
+        document.getElementById("result").innerText = "Whitelist load error 😢";
       }
     }
 
@@ -211,7 +222,7 @@
       if (!inputEl || !resultEl) return;
 
       const input = inputEl.value.trim().toLowerCase();
-      inputEl.value = ""; // очищаем поле после проверки
+      inputEl.value = ""; // очищаем поле
 
       if (!input) {
         resultEl.innerText = "Enter wallet address!";
@@ -227,6 +238,47 @@
         resultEl.innerText = "❌ Address not found in whitelist.";
         resultEl.style.color = "#ff6688";
       }
+    }
+
+    /* ===== FX ===== */
+    function startFX() {
+      const fx = document.getElementById("fx");
+
+      function spawnTicket() {
+        const el = document.createElement("div");
+        el.className = "ticket";
+        el.style.left = Math.random() * 100 + "vw";
+        el.style.top = "-10%";
+        el.style.animation = `fall ${6 + Math.random() * 4}s linear forwards`;
+        el.innerHTML = `<img src="ticket.png" alt="ticket">`;
+        fx.appendChild(el);
+        setTimeout(() => el.remove(), 10000);
+      }
+
+      function spawnBeret() {
+        const el = document.createElement("div");
+        el.className = "beret";
+        el.style.left = Math.random() * 100 + "vw";
+        el.style.top = "-10%";
+        el.style.animation = `fall ${5 + Math.random() * 5}s linear forwards`;
+        el.innerHTML = `<img src="beret.png" alt="beret">`;
+        fx.appendChild(el);
+        setTimeout(() => el.remove(), 10000);
+      }
+
+      function spawnBubble() {
+        const el = document.createElement("div");
+        el.className = "bubble";
+        el.style.left = Math.random() * 100 + "vw";
+        el.style.bottom = "-5%";
+        el.style.animation = `rise ${6 + Math.random() * 4}s ease-in forwards`;
+        fx.appendChild(el);
+        setTimeout(() => el.remove(), 10000);
+      }
+
+      setInterval(spawnTicket, 2500);
+      setInterval(spawnBeret, 4000);
+      setInterval(spawnBubble, 1200);
     }
   </script>
 </body>
