@@ -8,7 +8,36 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #111;
+    }
+
+    /* Фон */
+    .background {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      background: url("background.jpg") center/cover no-repeat;
+      z-index: 1;
+    }
+
+    /* Слой с монстрами */
+    .monsters {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%; height: 100%;
+      z-index: 5;
+      pointer-events: none;
+    }
+
+    .monster {
+      position: absolute;
+      width: 150px;
+      height: auto;
+      user-select: none;
+    }
+
+    .monster img {
+      width: 100%;
+      height: auto;
     }
 
     /* Контейнер для эффектов */
@@ -35,7 +64,6 @@
       user-select: none;
     }
 
-    /* Ключевые кадры с боковым смещением */
     @keyframes fall {
       from { transform: translate(0, -10vh) rotate(0deg); }
       to   { transform: translate(var(--drift, 0px), 110vh) rotate(360deg); }
@@ -55,6 +83,19 @@
   </style>
 </head>
 <body>
+  <!-- Фон -->
+  <div class="background"></div>
+
+  <!-- Монстры -->
+  <div class="monsters">
+    <div class="monster" style="top:20%; left:10%;">
+      <img src="monster1.png" alt="monster1">
+    </div>
+    <div class="monster" style="bottom:15%; right:15%;">
+      <img src="monster2.png" alt="monster2">
+    </div>
+  </div>
+
   <!-- Контейнер для спецэффектов -->
   <div class="fx-container" id="fx"></div>
 
@@ -66,7 +107,7 @@
       el.className = "ticket";
       el.style.left = Math.random() * 100 + "vw";
       el.style.top = "-15%";
-      el.style.setProperty("--drift", (Math.random() * 200 - 100) + "px"); // боковой снос
+      el.style.setProperty("--drift", (Math.random() * 200 - 100) + "px");
       el.style.animation = `fall ${2 + Math.random() * 2}s ease-in forwards`;
       el.innerHTML = `<img src="haha_20.png" alt="ticket">`;
       fx.appendChild(el);
