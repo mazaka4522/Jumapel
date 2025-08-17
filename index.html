@@ -213,22 +213,16 @@
     document.addEventListener("DOMContentLoaded", startFX);
 
     // ==== Чекер ====
-    let whitelist = [];
-    async function loadWhitelist() {
-  try {
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
-    const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + "&t=" + Date.now());
-    const res = await fetch(url, { cache: "no-store" });
-    let csvText = await res.text();
+   let whitelist = [];
 
-    // Убираем BOM и разбиваем построчно
-    csvText = csvText.replace(/^\uFEFF/, "");
-    whitelist = csvText
-      .split(/\r?\n/)                     // делим на строки
-      .map(l => l.split(",")[0])          // берём первый столбец
-      .map(s => s.replace(/['"]+/g, ""))  // убираем кавычки
-      .map(s => s.trim().toLowerCase())   // чистим пробелы
-      .filter(Boolean);                   // убираем пустые
+async function loadWhitelist() {
+  try {
+    // URL Web App, полученный при публикации скрипта
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxxxxx/exec";
+
+    const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
+    whitelist = await res.json(); // сразу получаем массив
+
     console.log("Whitelist loaded:", whitelist);
   } catch (err) {
     console.error("Whitelist load error:", err);
@@ -258,4 +252,5 @@
   </script>
 </body>
 </html>
+
 
