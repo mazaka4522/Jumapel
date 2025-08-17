@@ -1,72 +1,301 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Чекер</title>
-<style>
-  body {
-    margin: 0;
-    padding: 0;
-    overflow-x: hidden;
-    background: #000; /* фон страницы */
-    font-family: Arial, sans-serif;
-  }
+  <meta charset="UTF-8" />
+  <title>Jumapel Nads | Checker</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+      color: #fff;
+      overflow: hidden;
+    }
 
-  /* Верхний блок с картинкой */
-  .header-wrapper {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px;
-  }
+    /* контейнер чекера */
+    .checker-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 450px; /* ширина input + кнопка */
+      margin: 20px auto 15px auto;
+    }
 
-  .header-wrapper img {
-    max-width: 600px; /* ширина картинки, можно подкорректировать */
-    width: 100%;
-    height: auto;
-    display: block;
-  }
+    /* верхний билет (как был) */
+    .jumapel-pass {
+      width: 100%;
+      height: auto;
+      margin-bottom: 10px;
+      display: block;
+    }
 
-  /* Контейнер чекера */
-  .checker-wrapper {
-    display: flex;
-    justify-content: center;
-    margin-top: 10px;
-  }
+    /* СТАЦИОНАРНЫЙ ПАСС БЕЗ АНИМАЦИИ */
+    .ticket-static {
+      width: 100%;
+      margin: 10px 0;
+    }
+    .ticket-static img {
+      width: 100%;   /* = 450px, как ширина контейнера */
+      height: auto;  /* сохраняем пропорции */
+      display: block;
+    }
 
-  .checker {
-    width: 100%;
-    max-width: 600px; /* чтобы совпадало с шириной картинки */
-  }
+    /* checker */
+    .checker-wrapper {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+      width: 100%;
+    }
 
-  /* Остальные стили для монстров, билетов и анимации должны быть без изменений */
-</style>
+    #walletInput {
+      width: 300px;
+      padding: 12px 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
+
+    #checkBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+
+    .beret-btn {
+      width: 140px;
+      transition: transform 0.2s ease;
+    }
+    .beret-btn:hover {
+      transform: scale(1.05) rotate(-2deg);
+    }
+
+    #result {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+
+    /* (Удалены .ticket и анимации flyUp — больше не нужны) */
+
+    /* flying berets */
+    .beret-fly {
+      position: absolute;
+      bottom: -100px;
+      z-index: 1;
+    }
+    .beret-fly img {
+      width: 100px;
+      animation: flyBeret 8s linear infinite;
+    }
+    @keyframes flyBeret {
+      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(-120vh) translateX(-150px) rotate(-720deg); opacity: 0; }
+    }
+
+    /* bubbles */
+    .bubble {
+      position: absolute;
+      bottom: -100px;
+      width: 40px;
+      height: 40px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 50%;
+      animation: bubbleFloat 12s linear infinite;
+    }
+    @keyframes bubbleFloat {
+      0% { transform: translateY(0) scale(1); opacity: 0.5; }
+      50% { opacity: 1; }
+      100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
+    }
+
+    /* shadow monsters */
+    .shadow-monsters {
+      position: fixed;
+      bottom: -12%;
+      width: 100%;
+      height: 65vh;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 0; /* под всем */
+      opacity: 0.4;
+    }
+    .shadow img {
+      height: 100%;
+      filter: grayscale(1) brightness(0.3) blur(2px);
+      opacity: 0.7;
+    }
+    .shadow.center img {
+      animation: shadowFloat 10s ease-in-out infinite;
+    }
+    @keyframes shadowFloat {
+      0%, 100% { transform: translateY(5%); }
+      50% { transform: translateY(-5%); }
+    }
+
+    /* main monsters */
+    .bottom-monsters {
+      position: fixed;
+      bottom: -15%;
+      width: 100%;
+      height: 60vh;
+      pointer-events: none;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      z-index: 1;
+    }
+    .monster {
+      position: relative;
+      height: 100%;
+    }
+    .monster img {
+      height: 100%;
+      transform-origin: bottom center;
+      animation: monsterPeek 5s ease-in-out infinite;
+    }
+    .monster.center {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      height: 100%;
+    }
+    .monster.center img {
+      animation: monsterPeekCenter 5s ease-in-out infinite;
+    }
+    @keyframes monsterPeek {
+      0%, 100% { transform: translateY(15%) rotate(0deg); }
+      50% { transform: translateY(0) rotate(3deg); }
+    }
+    @keyframes monsterPeekCenter {
+      0%, 100% { transform: translateY(20%) scale(1); }
+      50% { transform: translateY(0) scale(1.05); }
+    }
+  </style>
 </head>
 <body>
 
-  <!-- Верхняя картинка вместо надписи -->
-  <div class="header-wrapper">
-    <img src="game9.png" alt="Game9">
-  </div>
+  <!-- контейнер с билетом и чекером -->
+  <div class="checker-container">
+    <!-- билет сверху (оставил как был, можно убрать при желании) -->
+    <img src="jumapel_pass.png" alt="Jumapel Pass" class="jumapel-pass" />
 
-  <!-- Чекер с кнопкой -->
-  <div class="checker-wrapper">
-    <div class="checker">
-      <input type="text" placeholder="Введите адрес кошелька">
-      <button>Проверить</button>
+    <!-- СТАЦИОНАРНЫЙ ПАСС БЕЗ АНИМАЦИИ, ШИРИНОЙ КАК ЧЕКЕР -->
+    <div class="ticket-static">
+      <img src="haha_20.png" alt="Static Pass" />
+    </div>
+
+    <!-- сам чекер -->
+    <div class="checker-wrapper">
+      <input type="text" id="walletInput" placeholder="Enter wallet address" />
+      <button id="checkBtn" onclick="checkWallet()">
+        <img src="bar_out_18.png" alt="Beret" class="beret-btn" />
+      </button>
     </div>
   </div>
 
-  <!-- Здесь остаётся вся ваша анимация, монстры, вылетающие билеты -->
-  <div id="monsters-container"></div>
-  <div id="tickets-container"></div>
-  <canvas id="animation-canvas"></canvas>
+  <div id="result"></div>
 
-  <!-- Ваши скрипты остаются без изменений -->
-  <script src="monsters.js"></script>
-  <script src="tickets.js"></script>
-  <script src="animation.js"></script>
+  <!-- УДАЛЕНО: flying tickets с анимацией -->
 
+  <!-- flying berets -->
+  <div class="beret-fly" style="left:20%;">
+    <img src="bar_out_18.png" alt="Flying Beret" style="animation-delay:2s;">
+  </div>
+  <div class="beret-fly" style="left:60%;">
+    <img src="bar_out_18.png" alt="Flying Beret" style="animation-delay:5s;">
+  </div>
+
+  <!-- bubbles -->
+  <div class="bubble" style="left:10%; animation-duration:15s;"></div>
+  <div class="bubble" style="left:50%; animation-duration:12s;"></div>
+  <div class="bubble" style="left:80%; animation-duration:18s;"></div>
+
+  <!-- shadow monsters -->
+  <div class="shadow-monsters">
+    <div class="shadow left">
+      <img src="game7.png" alt="Shadow monster left">
+    </div>
+    <div class="shadow center">
+      <img src="game6.png" alt="Shadow monster center">
+    </div>
+    <div class="shadow right">
+      <img src="game8.png" alt="Shadow monster right">
+    </div>
+  </div>
+
+  <!-- main monsters -->
+  <div class="bottom-monsters">
+    <div class="monster left">
+      <img src="game7.png" alt="Monster left">
+    </div>
+    <div class="monster center">
+      <img src="game6.png" alt="Monster center">
+    </div>
+    <div class="monster right">
+      <img src="game8.png" alt="Monster right">
+    </div>
+  </div>
+
+  <script>
+    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
+    let whitelist = [];
+
+    const checkBtn = document.getElementById("checkBtn");
+    checkBtn.disabled = true;
+
+    async function loadWhitelist() {
+      try {
+        const res = await fetch("https://corsproxy.io/?" + encodeURIComponent(SHEET_URL));
+        if (!res.ok) throw new Error("HTTP " + res.status);
+
+        const csvText = await res.text();
+        whitelist = csvText.split("\n")
+          .map(line => line.split(",")[0])
+          .map(addr => addr.trim().replace(/['"]/g, "").toLowerCase())
+          .filter(addr => addr.length > 0);
+
+        checkBtn.disabled = false;
+        console.log("Whitelist загружен:", whitelist.length, "адресов");
+      } catch (err) {
+        console.error("Whitelist load error:", err);
+        document.getElementById("result").innerText = "Whitelist load error 😢";
+      }
+    }
+
+    function checkWallet() {
+      const input = document.getElementById("walletInput").value.trim().toLowerCase();
+      const resultEl = document.getElementById("result");
+
+      if (!input) {
+        resultEl.innerText = "Enter wallet address!";
+        resultEl.style.color = "#ffaaaa";
+        return;
+      }
+
+      if (whitelist.includes(input)) {
+        resultEl.innerText = "✅ Address is in whitelist!";
+        resultEl.style.color = "#0f0";
+      } else {
+        resultEl.innerText = "❌ Address not found in whitelist.";
+        resultEl.style.color = "#f55";
+      }
+    }
+
+    document.getElementById("walletInput").addEventListener("keypress", e => {
+      if (e.key === "Enter") checkWallet();
+    });
+
+    loadWhitelist();
+  </script>
 </body>
 </html>
