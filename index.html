@@ -5,11 +5,6 @@
   <title>Jumapel Nads | Checker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --page-w: 90vw; /* адаптивная ширина */
-      --page-max: 450px;
-    }
-
     html, body {
       margin: 0;
       padding: 0;
@@ -20,22 +15,22 @@
       overflow: hidden;
     }
 
-    /* ====== СЛОИ ====== */
+    /* ===== Слои ===== */
     .layer-fx { z-index: 2; pointer-events: none; }
     .layer-monsters-shadow { z-index: 0; pointer-events: none; }
     .layer-monsters { z-index: 1; pointer-events: none; }
     .layer-checker { z-index: 5; }
     .layer-topimg { z-index: 6; }
 
-    /* ====== КОНТЕЙНЕР ====== */
+    /* ===== Контейнер ===== */
     .stack {
       position: relative;
-      width: var(--page-w);
-      max-width: var(--page-max);
+      width: 90vw;
+      max-width: 450px;
       margin: 20px auto 0 auto;
     }
 
-    /* ====== ВЕРХНЯЯ КАРТИНКА ====== */
+    /* ===== Верхняя картинка ===== */
     .top-image {
       position: relative;
       width: 100%;
@@ -47,7 +42,7 @@
       display: block;
     }
 
-    /* ====== ЧЕКЕР ====== */
+    /* ===== Чекер ===== */
     .checker {
       position: relative;
       width: 100%;
@@ -66,7 +61,6 @@
     }
     #walletInput {
       flex: 1;
-      min-width: 0;
       padding: 12px 15px;
       font-size: 16px;
       border-radius: 10px;
@@ -99,60 +93,7 @@
       min-height: 22px;
     }
 
-    /* ====== ЭФФЕКТЫ (билеты, береты, пузыри) ====== */
-    .fx-field {
-      position: fixed;
-      left: 0;
-      bottom: -120px;
-      width: 100vw;
-      height: 100vh;
-      overflow: hidden;
-    }
-    .fx-item {
-      position: absolute;
-      bottom: -120px;
-      left: 0;
-      transform: translateX(var(--x, 0)) translateY(0) rotate(0deg);
-      opacity: 0;
-      animation-iteration-count: infinite;
-      animation-timing-function: linear;
-      animation-fill-mode: forwards;
-      will-change: transform, opacity;
-      pointer-events: none;
-    }
-    .ticket-item img { width: var(--size, 110px); height: auto; display: block; }
-    .ticket-item { animation-name: flyTicket; animation-duration: var(--dur, 7s); animation-delay: var(--delay, 0s); }
-    @keyframes flyTicket {
-      0% { transform: translateX(var(--x, 0)) translateY(0) rotate(0deg); opacity: 0; }
-      5% { opacity: 1; }
-      100% { transform: translateX(calc(var(--x, 0) + 120px)) translateY(-110vh) rotate(360deg); opacity: 0; }
-    }
-    .beret-item img { width: var(--size, 95px); height: auto; display: block; }
-    .beret-item { animation-name: flyBeret; animation-duration: var(--dur, 9s); animation-delay: var(--delay, 0s); }
-    @keyframes flyBeret {
-      0% { transform: translateX(var(--x, 0)) translateY(0) rotate(0deg); opacity: 0; }
-      10% { opacity: 1; }
-      100% { transform: translateX(calc(var(--x, 0) - 160px)) translateY(-120vh) rotate(-720deg); opacity: 0; }
-    }
-    .bubble-item {
-      width: var(--size, 40px);
-      height: var(--size, 40px);
-      background: rgba(255,255,255,0.22);
-      border-radius: 50%;
-      animation-name: flyBubble;
-      animation-duration: var(--dur, 12s);
-      animation-delay: var(--delay, 0s);
-      box-shadow: inset -6px -10px 18px rgba(255,255,255,0.25),
-                  inset 6px 10px 18px rgba(0,0,0,0.08);
-      backdrop-filter: blur(2px);
-    }
-    @keyframes flyBubble {
-      0% { transform: translateX(var(--x, 0)) translateY(0) scale(1); opacity: 0.4; }
-      50% { opacity: 0.9; }
-      100% { transform: translateX(calc(var(--x, 0) + 40px)) translateY(-110vh) scale(1.6); opacity: 0; }
-    }
-
-    /* ====== МОНСТРЫ ====== */
+    /* ===== Монстры ===== */
     .monsters-shadow, .monsters {
       position: fixed;
       bottom: 0;
@@ -168,39 +109,35 @@
       opacity: 0.4;
       filter: grayscale(1) brightness(0.3) blur(2px);
     }
-    .monsters .monster,
-    .monsters-shadow .shadow {
-      flex: 1;
-      display: flex;
-      justify-content: center;
-      align-items: flex-end;
-    }
     .monsters img,
     .monsters-shadow img {
-      max-height: 35vh;
+      max-height: 55vh; /* все одинаковые крупные */
       width: auto;
     }
-    .monsters .center img,
-    .monsters-shadow .center img {
-      max-height: 45vh;
+    .monsters-shadow img { animation: shadowFloat 10s ease-in-out infinite; }
+    @keyframes shadowFloat {
+      0%, 100% { transform: translateY(5%); }
+      50% { transform: translateY(-5%); }
     }
-    .monsters-shadow .center img { animation: shadowFloat 10s ease-in-out infinite; }
-    @keyframes shadowFloat { 0%, 100% { transform: translateY(5%); } 50% { transform: translateY(-5%); } }
-    .monsters img { transform-origin: bottom center; animation: monsterPeek 5s ease-in-out infinite; }
-    .monsters .center img { animation: monsterPeekCenter 5s ease-in-out infinite; }
-    @keyframes monsterPeek { 0%, 100% { transform: translateY(15%) rotate(0deg); } 50% { transform: translateY(0) rotate(3deg); } }
-    @keyframes monsterPeekCenter { 0%, 100% { transform: translateY(20%) scale(1); } 50% { transform: translateY(0) scale(1.05); } }
+    .monsters img {
+      transform-origin: bottom center;
+      animation: monsterPeek 6s ease-in-out infinite;
+    }
+    @keyframes monsterPeek {
+      0%, 100% { transform: translateY(15%) rotate(0deg); }
+      50% { transform: translateY(0) rotate(3deg); }
+    }
   </style>
 </head>
 <body>
-  <!-- ВЕРХНЯЯ КАРТИНКА -->
+  <!-- Верхняя картинка -->
   <div class="stack layer-topimg">
     <div class="top-image">
-      <img src="foto9.png" alt="Foto9" class="foto9">
+      <img src="foto9.png" alt="Foto9">
     </div>
   </div>
 
-  <!-- ЧЕКЕР -->
+  <!-- Чекер -->
   <div class="stack layer-checker">
     <div class="checker">
       <div class="row">
@@ -213,40 +150,18 @@
     </div>
   </div>
 
-  <!-- ЭФФЕКТЫ (фон) -->
-  <div class="fx-field layer-fx" aria-hidden="true">
-    <!-- билеты -->
-    <div class="fx-item ticket-item" style="--x:10vw; --delay:0.5s; --dur:7.5s; --size:110px;"><img src="haha_20.png" alt=""></div>
-    <div class="fx-item ticket-item" style="--x:30vw; --delay:2.2s; --dur:6.2s; --size:120px;"><img src="haha_20.png" alt=""></div>
-    <div class="fx-item ticket-item" style="--x:55vw; --delay:1.4s; --dur:8.4s; --size:105px;"><img src="haha_20.png" alt=""></div>
-    <div class="fx-item ticket-item" style="--x:72vw; --delay:3.1s; --dur:7.0s; --size:115px;"><img src="haha_20.png" alt=""></div>
-    <div class="fx-item ticket-item" style="--x:85vw; --delay:4.0s; --dur:6.6s; --size:100px;"><img src="haha_20.png" alt=""></div>
-    <!-- береты -->
-    <div class="fx-item beret-item" style="--x:18vw; --delay:1.0s; --dur:9.2s; --size:95px;"><img src="bar_out_18.png" alt=""></div>
-    <div class="fx-item beret-item" style="--x:42vw; --delay:2.8s; --dur:7.8s; --size:100px;"><img src="bar_out_18.png" alt=""></div>
-    <div class="fx-item beret-item" style="--x:63vw; --delay:0.7s; --dur:9.8s; --size:90px;"><img src="bar_out_18.png" alt=""></div>
-    <div class="fx-item beret-item" style="--x:77vw; --delay:3.6s; --dur:8.6s; --size:92px;"><img src="bar_out_18.png" alt=""></div>
-    <!-- пузыри -->
-    <div class="fx-item bubble-item" style="--x:8vw; --delay:0.4s; --dur:13s; --size:38px;"></div>
-    <div class="fx-item bubble-item" style="--x:25vw; --delay:1.9s; --dur:15s; --size:44px;"></div>
-    <div class="fx-item bubble-item" style="--x:40vw; --delay:3.0s; --dur:12s; --size:36px;"></div>
-    <div class="fx-item bubble-item" style="--x:58vw; --delay:0.8s; --dur:16s; --size:50px;"></div>
-    <div class="fx-item bubble-item" style="--x:73vw; --delay:2.5s; --dur:14s; --size:42px;"></div>
-    <div class="fx-item bubble-item" style="--x:90vw; --delay:4.0s; --dur:18s; --size:46px;"></div>
-  </div>
-
-  <!-- ТЕНИ МОНСТРОВ -->
+  <!-- Тени монстров -->
   <div class="monsters-shadow layer-monsters-shadow">
-    <div class="shadow left"><img src="game7.png" alt="Shadow Left"></div>
-    <div class="shadow center"><img src="game6.png" alt="Shadow Center"></div>
-    <div class="shadow right"><img src="game8.png" alt="Shadow Right"></div>
+    <div class="shadow"><img src="game7.png" alt="Shadow Left"></div>
+    <div class="shadow"><img src="game6.png" alt="Shadow Center"></div>
+    <div class="shadow"><img src="game8.png" alt="Shadow Right"></div>
   </div>
 
-  <!-- МОНСТРЫ -->
+  <!-- Монстры -->
   <div class="monsters layer-monsters">
-    <div class="monster left"><img src="game7.png" alt="Monster Left"></div>
-    <div class="monster center"><img src="game6.png" alt="Monster Center"></div>
-    <div class="monster right"><img src="game8.png" alt="Monster Right"></div>
+    <div class="monster"><img src="game7.png" alt="Monster Left"></div>
+    <div class="monster"><img src="game6.png" alt="Monster Center"></div>
+    <div class="monster"><img src="game8.png" alt="Monster Right"></div>
   </div>
 
   <script>
@@ -296,9 +211,7 @@
       if (!inputEl || !resultEl) return;
 
       const input = inputEl.value.trim().toLowerCase();
-
-      // очищаем поле после проверки
-      inputEl.value = "";
+      inputEl.value = ""; // очищаем поле после проверки
 
       if (!input) {
         resultEl.innerText = "Enter wallet address!";
