@@ -15,7 +15,103 @@
       overflow: hidden;
     }
 
-    /* ===== Эффекты ===== */
+    /* ===== Слои ===== */
+    .layer-fx { z-index: 10; pointer-events: none; }
+    .layer-monsters-shadow { z-index: 0; pointer-events: none; }
+    .layer-monsters { z-index: 1; pointer-events: none; }
+    .layer-checker { z-index: 5; }
+    .layer-topimg { z-index: 6; }
+
+    /* ===== Контейнер ===== */
+    .stack {
+      position: relative;
+      width: 90vw;
+      max-width: 450px;
+      margin: 20px auto 0 auto;
+    }
+
+    /* ===== Верхняя картинка ===== */
+    .top-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ===== Чекер ===== */
+    .checker {
+      position: relative;
+      width: 100%;
+      margin: 0 auto 10px auto;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+    .checker .row {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 10px;
+    }
+    #walletInput {
+      flex: 1;
+      padding: 12px 15px;
+      font-size: 16px;
+      border-radius: 10px;
+      border: none;
+      outline: none;
+    }
+    #checkBtn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    #checkBtn:disabled { opacity: 0.5; pointer-events: none; }
+    .beret-btn {
+      width: 140px;
+      transition: transform 0.2s ease;
+      display: block;
+    }
+    .beret-btn:hover { transform: scale(1.05) rotate(-2deg); }
+    #result {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 18px;
+      font-weight: bold;
+      min-height: 22px;
+    }
+
+    /* ===== Монстры ===== */
+    .monsters-shadow, .monsters {
+      position: fixed;
+      bottom: -15vh;
+      left: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-end;
+      pointer-events: none;
+      padding: 0 3vw;
+    }
+    .monsters-shadow {
+      opacity: 0.4;
+      filter: grayscale(1) brightness(0.3) blur(2px);
+    }
+    .monsters img,
+    .monsters-shadow img {
+      height: 70vh;
+      width: auto;
+      object-fit: contain;
+    }
+    .monsters img { animation: monsterPeek 6s ease-in-out infinite; }
+    @keyframes monsterPeek {
+      0%, 100% { transform: translateY(10%) rotate(0deg); }
+      50% { transform: translateY(0) rotate(2deg); }
+    }
+
+    /* ===== Эффекты падения ===== */
     .fx-container {
       position: fixed;
       top: 0; left: 0;
@@ -32,8 +128,6 @@
       width: 80px;
       opacity: 0.9;
     }
-
-    /* Падение + вращение */
     @keyframes fallAndSpin {
       0%   { transform: translateY(-10%) rotate(0deg) scale(1); opacity: 1; }
       50%  { transform: translateY(50vh) rotate(180deg) scale(1.1); opacity: 0.9; }
@@ -42,10 +136,43 @@
   </style>
 </head>
 <body>
+  <!-- Верхняя картинка -->
+  <div class="stack layer-topimg">
+    <div class="top-image"><img src="foto9.png" alt="Foto9"></div>
+  </div>
+
+  <!-- Чекер -->
+  <div class="stack layer-checker">
+    <div class="checker">
+      <div class="row">
+        <input type="text" id="walletInput" placeholder="Enter wallet address" />
+        <button id="checkBtn" onclick="checkWallet()">
+          <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
+        </button>
+      </div>
+      <div id="result"></div>
+    </div>
+  </div>
+
+  <!-- Тени монстров -->
+  <div class="monsters-shadow layer-monsters-shadow">
+    <div><img src="game7.png" alt="Shadow Left"></div>
+    <div><img src="game6.png" alt="Shadow Center"></div>
+    <div><img src="game8.png" alt="Shadow Right"></div>
+  </div>
+
+  <!-- Монстры -->
+  <div class="monsters layer-monsters">
+    <div><img src="game7.png" alt="Monster Left"></div>
+    <div><img src="game6.png" alt="Monster Center"></div>
+    <div><img src="game8.png" alt="Monster Right"></div>
+  </div>
+
   <!-- Эффекты -->
   <div class="fx-container layer-fx" id="fx"></div>
 
   <script>
+    // ==== Падение билетов и беретов ====
     function startFX() {
       const fx = document.getElementById("fx");
 
@@ -55,7 +182,7 @@
         el.className = "ticket";
         el.style.left = Math.random() * 100 + "vw";
         el.style.top = "-10%";
-        const duration = 2 + Math.random() * 2; // скорость 2–4 сек
+        const duration = 2 + Math.random() * 2;
         const rotationStart = Math.random() * 360;
         el.style.animation = `fallAndSpin ${duration}s linear forwards`;
         el.style.transform = `rotate(${rotationStart}deg)`;
@@ -70,7 +197,7 @@
         el.className = "beret";
         el.style.left = Math.random() * 100 + "vw";
         el.style.top = "-10%";
-        const duration = 2 + Math.random() * 2; // скорость 2–4 сек
+        const duration = 2 + Math.random() * 2;
         const rotationStart = Math.random() * 360;
         el.style.animation = `fallAndSpin ${duration}s linear forwards`;
         el.style.transform = `rotate(${rotationStart}deg)`;
@@ -79,12 +206,46 @@
         setTimeout(() => el.remove(), duration * 1000 + 500);
       }
 
-      // Спавн: часто и хаотично
-      setInterval(spawnTicket, 600); // билеты чаще
-      setInterval(spawnBeret, 900);  // береты чуть реже
+      setInterval(spawnTicket, 600);
+      setInterval(spawnBeret, 900);
     }
 
     document.addEventListener("DOMContentLoaded", startFX);
+
+    // ==== Чекер ====
+    let whitelist = [];
+    async function loadWhitelist() {
+      try {
+        const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
+        const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + "&t=" + Date.now());
+        const res = await fetch(url, { cache: "no-store" });
+        const csvText = await res.text();
+        whitelist = csvText.split(/\r?\n/).map(l => l.split(",")[0].trim().toLowerCase()).filter(Boolean);
+      } catch (err) {
+        console.error("Whitelist load error:", err);
+      }
+    }
+
+    function checkWallet() {
+      const inputEl = document.getElementById("walletInput");
+      const resultEl = document.getElementById("result");
+      const input = inputEl.value.trim().toLowerCase();
+      inputEl.value = "";
+      if (!input) {
+        resultEl.innerText = "Enter wallet address!";
+        resultEl.style.color = "#ffaaaa";
+        return;
+      }
+      if (whitelist.includes(input)) {
+        resultEl.innerText = "✅ Address is in whitelist!";
+        resultEl.style.color = "#00ff88";
+      } else {
+        resultEl.innerText = "❌ Address not found in whitelist.";
+        resultEl.style.color = "#ff6688";
+      }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadWhitelist);
   </script>
 </body>
 </html>
