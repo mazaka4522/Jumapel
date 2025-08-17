@@ -171,87 +171,86 @@
   <!-- Эффекты -->
   <div class="fx-container layer-fx" id="fx"></div>
 
-  <script>
-    // ==== Падение билетов и беретов ====
-    function startFX() {
-      const fx = document.getElementById("fx");
+ <script>
+  // ==== Падение билетов и беретов ====
+  function startFX() {
+    const fx = document.getElementById("fx");
 
-      // ==== Билет (haha_20.png) ====
-      function spawnTicket() {
-        const el = document.createElement("div");
-        el.className = "ticket";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.top = "-10%";
-        const duration = 2 + Math.random() * 2;
-        const rotationStart = Math.random() * 360;
-        el.style.animation = `fallAndSpin ${duration}s linear forwards`;
-        el.style.transform = `rotate(${rotationStart}deg)`;
-        el.innerHTML = `<img src="haha_20.png" alt="ticket">`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), duration * 1000 + 500);
-      }
-
-      // ==== Берет (bar_out_18.png) ====
-      function spawnBeret() {
-        const el = document.createElement("div");
-        el.className = "beret";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.top = "-10%";
-        const duration = 2 + Math.random() * 2;
-        const rotationStart = Math.random() * 360;
-        el.style.animation = `fallAndSpin ${duration}s linear forwards`;
-        el.style.transform = `rotate(${rotationStart}deg)`;
-        el.innerHTML = `<img src="bar_out_18.png" alt="beret">`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), duration * 1000 + 500);
-      }
-
-      setInterval(spawnTicket, 600);
-      setInterval(spawnBeret, 900);
+    function spawnFalling(src, cls) {
+      const el = document.createElement("div");
+      el.className = cls;
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.top = "-10%";
+      const duration = 2 + Math.random() * 2;
+      const rotationStart = Math.random() * 360;
+      el.style.animation = `fallAndSpin ${duration}s linear forwards`;
+      el.style.transform = `rotate(${rotationStart}deg)`;
+      el.innerHTML = `<img src="${src}" alt="${cls}">`;
+      fx.appendChild(el);
+      setTimeout(() => el.remove(), duration * 1000 + 500);
     }
 
-    document.addEventListener("DOMContentLoaded", startFX);
-
-    // ==== Чекер ====
-   let whitelist = [];
-
-async function loadWhitelist() {
-  try {
-    // URL Web App, полученный при публикации скрипта
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhH8yWXzynq2iQ_P9EidxaBy8QmY26t_FiXiwi6gYbbsnlhYuWJ8qRZJKOQzz49sbx/exec";
-
-    const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
-    whitelist = await res.json(); // сразу получаем массив
-
-    console.log("Whitelist loaded:", whitelist);
-  } catch (err) {
-    console.error("Whitelist load error:", err);
+    setInterval(() => spawnFalling("haha_20.png", "ticket"), 600);
+    setInterval(() => spawnFalling("bar_out_18.png", "beret"), 900);
   }
-}
 
-    function checkWallet() {
-      const inputEl = document.getElementById("walletInput");
-      const resultEl = document.getElementById("result");
-      const input = inputEl.value.trim().toLowerCase();
-      inputEl.value = "";
-      if (!input) {
-        resultEl.innerText = "Enter wallet address!";
-        resultEl.style.color = "#ffaaaa";
-        return;
-      }
-      if (whitelist.includes(input)) {
-        resultEl.innerText = "✅ Address is in whitelist!";
-        resultEl.style.color = "#00ff88";
-      } else {
-        resultEl.innerText = "❌ Address not found in whitelist.";
-        resultEl.style.color = "#ff6688";
-      }
+  document.addEventListener("DOMContentLoaded", startFX);
+
+  // ==== Чекер ====
+  let whitelist = [];
+
+  async function loadWhitelist() {
+    try {
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhH8yWXzynq2iQ_P9EidxaBy8QmY26t_FiXiwi6gYbbsnlhYuWJ8qRZJKOQzz49sbx/exec";
+
+      const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
+      whitelist = await res.json();
+
+      console.log("Whitelist loaded:", whitelist);
+
+      // включаем кнопку только после загрузки
+      document.getElementById("checkBtn").disabled = false;
+    } catch (err) {
+      console.error("Whitelist load error:", err);
+      document.getElementById("result").innerText = "⚠️ Ошибка загрузки whitelist";
+    }
+  }
+
+  function showResult(message, color) {
+    const resultEl = document.getElementById("result");
+    resultEl.innerText = message;
+    resultEl.style.color = color;
+
+    // простая анимация "подпрыгивания"
+    resultEl.animate([
+      { transform: "scale(1)" },
+      { transform: "scale(1.15)" },
+      { transform: "scale(1)" }
+    ], { duration: 300 });
+  }
+
+  function checkWallet() {
+    const inputEl = document.getElementById("walletInput");
+    const input = inputEl.value.trim().toLowerCase();
+    inputEl.value = "";
+
+    if (!input) {
+      showResult("Enter wallet address!", "#ffaaaa");
+      return;
     }
 
-    document.addEventListener("DOMContentLoaded", loadWhitelist);
-  </script>
+    if (whitelist.includes(input)) {
+      showResult("✅ Address is in whitelist!", "#00ff88");
+    } else {
+      showResult("❌ Address not found in whitelist.", "#ff6688");
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("checkBtn").disabled = true; // кнопка выключена
+    loadWhitelist();
+  });
+</script>
+  
 </body>
 </html>
-
-
-
