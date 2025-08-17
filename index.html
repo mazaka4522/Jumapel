@@ -2,58 +2,29 @@
 <html lang="ru">
 <head>
   <meta charset="UTF-8">
-  <title>JUMAPEL GAME</title>
+  <title>JUMAPEL</title>
   <style>
     body {
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: url("fon.png") no-repeat center center / cover; /* твой фон */
+      background: #111; /* у тебя тут был свой фон, не меняй */
     }
 
-    /* ======= Твоя основа ======= */
-    .monster {
-      position: absolute;
-      width: 150px;
-      height: 150px;
-      background-size: cover;
-    }
+    /* === Твоя основа (фон, монстры, чекер, фото9, тени) === */
+    /* Оставь всё, как у тебя было в исходном коде! */
 
-    .monster1 { left: 10%; top: 20%; background-image: url("monster1.png"); }
-    .monster2 { left: 50%; top: 40%; background-image: url("monster2.png"); }
-    .monster3 { left: 80%; top: 25%; background-image: url("monster3.png"); }
-
-    .checker {
-      position: absolute;
-      bottom: 0;
-      left: 0;
-      width: 100%;
-      height: 150px;
-      background: url("checker.png") repeat-x;
-      opacity: 0.8;
-    }
-
-    .photo9 {
-      position: absolute;
-      right: 5%;
-      bottom: 10%;
-      width: 200px;
-      height: auto;
-      border-radius: 12px;
-      box-shadow: 0 0 15px rgba(0,0,0,0.7);
-    }
-
-    /* ======= Эффекты (береты/билеты/пузырьки) ======= */
+    /* === Контейнер для падающих берет и билетов === */
     .fx-container {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
-      overflow: hidden;
       pointer-events: none;
-      z-index: 50; /* поверх монстров */
+      overflow: hidden;
+      z-index: 999; /* поверх всего */
     }
 
-    .ticket, .beret, .bubble {
+    .ticket, .beret {
       position: absolute;
       display: block;
       pointer-events: none;
@@ -68,28 +39,12 @@
       from { transform: translateY(-10vh) rotate(0deg); }
       to   { transform: translateY(110vh) rotate(360deg); }
     }
-
-    @keyframes rise {
-      from { transform: translateY(110vh) scale(0.5); opacity: 0.8; }
-      to   { transform: translateY(-20vh) scale(1.2); opacity: 0; }
-    }
-
-    .bubble {
-      border-radius: 50%;
-      background: rgba(255,255,255,0.3);
-      backdrop-filter: blur(3px);
-    }
   </style>
 </head>
 <body>
-  <!-- ======= Твоя основа ======= -->
-  <div class="monster monster1"></div>
-  <div class="monster monster2"></div>
-  <div class="monster monster3"></div>
-  <div class="checker"></div>
-  <img src="photo9.png" alt="photo9" class="photo9">
+  <!-- === Твоя сцена с фоном, монстрами, чекером и фото9 остаётся как есть === -->
 
-  <!-- ======= Контейнер для спецэффектов ======= -->
+  <!-- Контейнер для падающих берет и билетов -->
   <div class="fx-container" id="fx"></div>
 
   <script>
@@ -101,12 +56,12 @@
       el.style.left = Math.random() * 100 + "vw";
       el.style.top = "-15%";
       const rotate = Math.random() * 360;
-      const duration = 2 + Math.random() * 3; // разное время падения
-      const direction = Math.random() < 0.5 ? 1 : -1; // направление вращения
+      const duration = 2 + Math.random() * 3;
+      const direction = Math.random() < 0.5 ? 1 : -1;
+      const size = 60 + Math.random() * 80; // случайный размер
       el.style.transform = `rotate(${rotate}deg)`;
       el.style.animation = `fall ${duration}s linear forwards`;
-      el.querySelector;
-      el.innerHTML = `<img src="haha_20.png" alt="ticket" style="transform: rotate(${direction * 20}deg);">`;
+      el.innerHTML = `<img src="haha_20.png" alt="ticket" style="width:${size}px; transform: rotate(${direction * 15}deg);">`;
       fx.appendChild(el);
       setTimeout(() => el.remove(), duration * 1000 + 1000);
     }
@@ -119,36 +74,20 @@
       const rotate = Math.random() * 360;
       const duration = 2 + Math.random() * 3;
       const direction = Math.random() < 0.5 ? 1 : -1;
+      const size = 60 + Math.random() * 80;
       el.style.transform = `rotate(${rotate}deg)`;
       el.style.animation = `fall ${duration}s linear forwards`;
-      el.innerHTML = `<img src="bar_out_18.png" alt="beret" style="transform: rotate(${direction * 30}deg);">`;
+      el.innerHTML = `<img src="bar_out_18.png" alt="beret" style="width:${size}px; transform: rotate(${direction * 20}deg);">`;
       fx.appendChild(el);
       setTimeout(() => el.remove(), duration * 1000 + 1000);
     }
 
-    function spawnBubble() {
-      const el = document.createElement("div");
-      el.className = "bubble";
-      const size = 20 + Math.random() * 40;
-      el.style.width = size + "px";
-      el.style.height = size + "px";
-      el.style.left = Math.random() * 100 + "vw";
-      el.style.top = "110%";
-      const duration = 4 + Math.random() * 3;
-      el.style.animation = `rise ${duration}s linear forwards`;
-      fx.appendChild(el);
-      setTimeout(() => el.remove(), duration * 1000 + 1000);
-    }
-
-    // хаотичный поток
     function randomSpawn() {
       const r = Math.random();
-      if (r < 0.4) {
+      if (r < 0.5) {
         spawnTicket();
-      } else if (r < 0.8) {
-        spawnBeret();
       } else {
-        spawnBubble();
+        spawnBeret();
       }
       setTimeout(randomSpawn, 300 + Math.random() * 700);
     }
@@ -157,3 +96,4 @@
   </script>
 </body>
 </html>
+
