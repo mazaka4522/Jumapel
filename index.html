@@ -86,14 +86,14 @@
     /* ===== Монстры ===== */
     .monsters-shadow, .monsters {
       position: fixed;
-      bottom: 0;
+      bottom: -15vh; /* монстры "ныряют" под экран */
       left: 0;
       width: 100%;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
       pointer-events: none;
-      padding: 0 5vw;
+      padding: 0 3vw;
     }
     .monsters-shadow {
       opacity: 0.4;
@@ -101,13 +101,29 @@
     }
     .monsters img,
     .monsters-shadow img {
-      max-height: 55vh;
+      height: 70vh; /* одинаковый рост */
       width: auto;
+      object-fit: contain;
+    }
+    /* поправка для пчелы */
+    .monsters div:nth-child(1) img,
+    .monsters-shadow div:nth-child(1) img {
+      transform: translateY(5vh);
+    }
+    /* центр без смещения */
+    .monsters div:nth-child(2) img,
+    .monsters-shadow div:nth-child(2) img {
+      transform: translateY(0);
+    }
+    /* фиолетовый чуть ниже */
+    .monsters div:nth-child(3) img,
+    .monsters-shadow div:nth-child(3) img {
+      transform: translateY(3vh);
     }
     .monsters img { animation: monsterPeek 6s ease-in-out infinite; }
     @keyframes monsterPeek {
-      0%, 100% { transform: translateY(15%) rotate(0deg); }
-      50% { transform: translateY(0) rotate(3deg); }
+      0%, 100% { transform: translateY(10%) rotate(0deg); }
+      50% { transform: translateY(0) rotate(2deg); }
     }
 
     /* ===== Эффекты (Tickets, Berets, Bubbles) ===== */
@@ -194,7 +210,7 @@
         if (e.key === "Enter") checkWallet();
       });
 
-      startFX(); // запустить эффекты
+      startFX(); // эффекты
     });
 
     async function loadWhitelist() {
