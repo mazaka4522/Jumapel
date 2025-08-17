@@ -5,154 +5,152 @@
   <title>Jumapel Nads | Checker</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    :root {
-      --page-w: 450px;
-    }
+    :root { --page-w: 450px; }
+
     html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
+      margin: 0; padding: 0; height: 100%;
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-      color: #fff;
-      overflow: hidden;
+      color: #fff; overflow: hidden;
     }
+
     .layer-fx { z-index: 2; pointer-events: none; }
     .layer-monsters-shadow { z-index: 0; pointer-events: none; }
     .layer-monsters { z-index: 1; pointer-events: none; }
     .layer-checker { z-index: 5; }
     .layer-topimg { z-index: 6; }
 
-    .stack {
-      position: relative;
-      width: var(--page-w);
-      margin: 20px auto 0 auto;
-    }
+    .stack { position: relative; width: var(--page-w); margin: 20px auto 0 auto; }
 
-    .top-image img { width: 100%; display: block; }
+    .top-image { position: relative; width: var(--page-w); margin: 0 auto 10px auto; }
+    .top-image img { width: 100%; height: auto; display: block; }
 
-    .checker {
-      width: var(--page-w);
-      margin: 0 auto 10px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .checker .row {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-    #walletInput {
-      width: 300px;
-      padding: 12px 15px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
+    .checker { position: relative; width: var(--page-w); margin: 0 auto 10px auto; display: flex; flex-direction: column; align-items: center; text-align: center; }
+    .checker .row { width: 100%; display: flex; justify-content: center; align-items: center; gap: 10px; }
+    #walletInput { width: 300px; padding: 12px 15px; font-size: 16px; border-radius: 10px; border: none; outline: none; }
     #checkBtn { background: none; border: none; cursor: pointer; padding: 0; }
-    .beret-btn { width: 140px; transition: transform 0.2s ease; }
+    .beret-btn { width: 140px; transition: transform 0.2s ease; display: block; }
     .beret-btn:hover { transform: scale(1.05) rotate(-2deg); }
-    #result {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      min-height: 22px;
+    #result { text-align: center; margin-top: 10px; font-size: 18px; font-weight: bold; min-height: 22px; }
+
+    .fx-field { position: fixed; left: 0; bottom: -120px; width: 100vw; height: 100vh; overflow: hidden; }
+    .fx-item { position: absolute; bottom: -120px; left: 0; transform: translateX(var(--x, 0)) translateY(0) rotate(0deg); opacity: 0; animation-iteration-count: infinite; animation-timing-function: linear; animation-fill-mode: forwards; pointer-events: none; will-change: transform, opacity; }
+
+    .ticket-item img { width: var(--size, 110px); height: auto; display: block; }
+    .ticket-item { animation-name: flyTicket; animation-duration: var(--dur, 7s); animation-delay: var(--delay, 0s); }
+    @keyframes flyTicket {
+      0% { transform: translateX(var(--x,0)) translateY(0) rotate(0deg); opacity:0; }
+      5% { opacity:1; }
+      100% { transform: translateX(calc(var(--x,0)+120px)) translateY(-110vh) rotate(360deg); opacity:0; }
     }
+
+    .beret-item img { width: var(--size, 95px); height: auto; display: block; }
+    .beret-item { animation-name: flyBeret; animation-duration: var(--dur, 9s); animation-delay: var(--delay, 0s); }
+    @keyframes flyBeret {
+      0% { transform: translateX(var(--x,0)) translateY(0) rotate(0deg); opacity:0; }
+      10% { opacity:1; }
+      100% { transform: translateX(calc(var(--x,0)-160px)) translateY(-120vh) rotate(-720deg); opacity:0; }
+    }
+
+    .bubble-item { width: var(--size, 40px); height: var(--size, 40px); background: rgba(255,255,255,0.22); border-radius: 50%; animation-name: flyBubble; animation-duration: var(--dur,12s); animation-delay: var(--delay,0s); box-shadow: inset -6px -10px 18px rgba(255,255,255,0.25), inset 6px 10px 18px rgba(0,0,0,0.08); backdrop-filter: blur(2px); }
+    @keyframes flyBubble {
+      0% { transform: translateX(var(--x,0)) translateY(0) scale(1); opacity:0.4; }
+      50% { opacity:0.9; }
+      100% { transform: translateX(calc(var(--x,0)+40px)) translateY(-110vh) scale(1.6); opacity:0; }
+    }
+
+    .monsters-shadow, .monsters { position: fixed; bottom: -15%; left: 0; width: 100%; height: 60vh; display: flex; justify-content: space-between; align-items: flex-end; pointer-events: none; }
+    .monsters-shadow { bottom: -12%; height: 65vh; opacity: 0.4; filter: grayscale(1) brightness(0.3) blur(2px); }
+    .monsters-shadow img { height: 100%; opacity: 0.7; }
+    .monsters-shadow .center img { animation: shadowFloat 10s ease-in-out infinite; }
+    @keyframes shadowFloat { 0%,100% { transform: translateY(5%); } 50% { transform: translateY(-5%); } }
+
+    .monsters img { height: 100%; transform-origin: bottom center; animation: monsterPeek 5s ease-in-out infinite; }
+    .monsters .center img { animation: monsterPeekCenter 5s ease-in-out infinite; }
+    @keyframes monsterPeek { 0%,100% { transform: translateY(15%) rotate(0deg); } 50% { transform: translateY(0) rotate(3deg); } }
+    @keyframes monsterPeekCenter { 0%,100% { transform: translateY(20%) scale(1); } 50% { transform: translateY(0) scale(1.05); } }
   </style>
 </head>
 <body>
 
-  <div class="stack layer-topimg">
-    <div class="top-image">
-      <img src="foto9.png" alt="Foto9">
-    </div>
+<!-- Верхняя картинка -->
+<div class="stack layer-topimg">
+  <div class="top-image">
+    <img src="foto9.png" alt="Foto9" class="foto9">
   </div>
+</div>
 
-  <div class="stack layer-checker">
-    <div class="checker">
-      <div class="row">
-        <input type="text" id="walletInput" placeholder="Enter wallet address" />
-        <button id="checkBtn" onclick="checkWallet()">
-          <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
-        </button>
-      </div>
-      <div id="result"></div>
+<!-- Чекер -->
+<div class="stack layer-checker">
+  <div class="checker">
+    <div class="row">
+      <input type="text" id="walletInput" placeholder="Enter wallet address" />
+      <button id="checkBtn" onclick="checkWallet()">
+        <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
+      </button>
     </div>
+    <div id="result"></div>
   </div>
+</div>
+
+<!-- Фоновые эффекты -->
+<div class="fx-field layer-fx" aria-hidden="true">
+  <div class="fx-item ticket-item" style="--x:10vw; --delay:0.5s; --dur:7.5s; --size:110px;"><img src="haha_20.png" alt=""></div>
+  <div class="fx-item beret-item" style="--x:18vw; --delay:1.0s; --dur:9.2s; --size:95px;"><img src="bar_out_18.png" alt=""></div>
+  <div class="fx-item bubble-item" style="--x:8vw; --delay:0.4s; --dur:13s; --size:38px;"></div>
+</div>
+
+<!-- Тени монстров -->
+<div class="monsters-shadow layer-monsters-shadow">
+  <div class="shadow left"><img src="game7.png" alt="Shadow Left"></div>
+  <div class="shadow center"><img src="game6.png" alt="Shadow Center"></div>
+  <div class="shadow right"><img src="game8.png" alt="Shadow Right"></div>
+</div>
+
+<!-- Монстры -->
+<div class="monsters layer-monsters">
+  <div class="monster left"><img src="game7.png" alt="Monster Left"></div>
+  <div class="monster center"><img src="game6.png" alt="Monster Center"></div>
+  <div class="monster right"><img src="game8.png" alt="Monster Right"></div>
+</div>
 
 <script>
-  const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
-  let whitelist = [];
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
+let whitelist = [];
 
-  document.addEventListener("DOMContentLoaded", () => {
-    const checkBtn = document.getElementById("checkBtn");
-    if (checkBtn) checkBtn.disabled = true;
+document.addEventListener("DOMContentLoaded", () => {
+  const checkBtn = document.getElementById("checkBtn");
+  if (checkBtn) checkBtn.disabled = true;
+  loadWhitelist().then(() => { if (checkBtn) checkBtn.disabled = false; });
+  document.getElementById("walletInput").addEventListener("keypress", e => { if (e.key === "Enter") checkWallet(); });
+});
 
-    loadWhitelist().then(() => {
-      if (checkBtn) checkBtn.disabled = false;
-    });
-
-    document.getElementById("walletInput").addEventListener("keypress", e => {
-      if (e.key === "Enter") checkWallet();
-    });
-  });
-
-  async function loadWhitelist() {
-    try {
-      const bust = "&t=" + Date.now();
-      const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + bust);
-      const res = await fetch(url, { cache: "no-store" });
-      if (!res.ok) throw new Error("HTTP " + res.status);
-      const csvText = await res.text();
-      whitelist = csvText
-        .split(/\r?\n/)
-        .map(line => line.split(",")[0])
-        .map(addr => (addr || "").trim().replace(/['"]/g, "").toLowerCase())
-        .filter(addr => addr.length > 0);
-      whitelist = Array.from(new Set(whitelist));
-      console.log("Whitelist loaded:", whitelist.length);
-    } catch (err) {
-      console.error("Whitelist load error:", err);
-      const resultEl = document.getElementById("result");
-      if (resultEl) {
-        resultEl.innerText = "Whitelist load error 😢";
-        resultEl.style.color = "#ffaaaa";
-      }
-    }
-  }
-
-  function checkWallet() {
-    const inputEl = document.getElementById("walletInput");
+async function loadWhitelist() {
+  try {
+    const bust = "&t=" + Date.now();
+    const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + bust);
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const csvText = await res.text();
+    whitelist = csvText.split(/\r?\n/).map(line => line.split(",")[0]).map(addr => (addr || "").trim().replace(/['"]/g,"").toLowerCase()).filter(addr => addr.length>0);
+    whitelist = Array.from(new Set(whitelist));
+    console.log("Whitelist загружен:", whitelist.length, "адресов");
+  } catch(err) {
+    console.error("Whitelist load error:", err);
     const resultEl = document.getElementById("result");
-    if (!inputEl || !resultEl) return;
-
-    const input = inputEl.value.trim().toLowerCase();
-
-    if (!input) {
-      resultEl.innerText = "Enter wallet address!";
-      resultEl.style.color = "#ffaaaa";
-      return;
-    }
-
-    if (whitelist.includes(input)) {
-      resultEl.innerText = "✅ Address is in whitelist!";
-      resultEl.style.color = "#00ff88";
-    } else {
-      resultEl.innerText = "❌ Address not found in whitelist.";
-      resultEl.style.color = "#ff6688";
-    }
-
-    // Очищаем поле и ставим фокус
-    inputEl.value = "";
-    inputEl.focus();
+    if(resultEl){ resultEl.innerText = "Whitelist load error 😢"; resultEl.style.color="#ffaaaa"; }
   }
-</script>
+}
 
+function checkWallet() {
+  const inputEl = document.getElementById("walletInput");
+  const resultEl = document.getElementById("result");
+  if(!inputEl || !resultEl) return;
+  const input = inputEl.value.trim().toLowerCase();
+  if(!input) { resultEl.innerText="Enter wallet address!"; resultEl.style.color="#ffaaaa"; return; }
+  if(whitelist.includes(input)) { resultEl.innerText="✅ Address is in whitelist!"; resultEl.style.color="#00ff88"; }
+  else { resultEl.innerText="❌ Address not found in whitelist."; resultEl.style.color="#ff6688"; }
+}
+</script>
 </body>
 </html>
