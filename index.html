@@ -1,301 +1,115 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Jumapel Nads | Checker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <title>JUMAPEL</title>
   <style>
-    html, body {
+    body {
       margin: 0;
       padding: 0;
-      height: 100%;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-      color: #fff;
       overflow: hidden;
+      background: #111;
     }
 
-    /* ===== Слои ===== */
-    .layer-fx { z-index: 10; } /* эффекты всегда поверх */
-    .layer-monsters-shadow { z-index: 0; pointer-events: none; }
-    .layer-monsters { z-index: 1; pointer-events: none; }
-    .layer-checker { z-index: 5; }
-    .layer-topimg { z-index: 6; }
-
-    /* ===== Контейнер ===== */
-    .stack {
-      position: relative;
-      width: 90vw;
-      max-width: 450px;
-      margin: 20px auto 0 auto;
-    }
-
-    /* ===== Верхняя картинка ===== */
-    .top-image img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* ===== Чекер ===== */
-    .checker {
-      position: relative;
-      width: 100%;
-      margin: 0 auto 10px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
-    .checker .row {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
-    #walletInput {
-      flex: 1;
-      padding: 12px 15px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
-    #checkBtn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-    }
-    #checkBtn:disabled { opacity: 0.5; pointer-events: none; }
-    .beret-btn {
-      width: 140px;
-      transition: transform 0.2s ease;
-      display: block;
-    }
-    .beret-btn:hover { transform: scale(1.05) rotate(-2deg); }
-    #result {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      min-height: 22px;
-    }
-
-    /* ===== Монстры ===== */
-    .monsters-shadow, .monsters {
-      position: fixed;
-      bottom: -15vh;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      pointer-events: none;
-      padding: 0 3vw;
-    }
-    .monsters-shadow {
-      opacity: 0.4;
-      filter: grayscale(1) brightness(0.3) blur(2px);
-    }
-    .monsters img,
-    .monsters-shadow img {
-      height: 70vh;
-      width: auto;
-      object-fit: contain;
-    }
-    .monsters img { animation: monsterPeek 6s ease-in-out infinite; }
-    @keyframes monsterPeek {
-      0%, 100% { transform: translateY(10%) rotate(0deg); }
-      50% { transform: translateY(0) rotate(2deg); }
-    }
-
-    /* ===== Эффекты ===== */
+    /* Контейнер для эффектов */
     .fx-container {
       position: fixed;
       top: 0; left: 0;
       width: 100%; height: 100%;
       overflow: hidden;
-      pointer-events: none; /* контейнер клики не ловит */
+      pointer-events: none;
+      z-index: 10; /* выше монстров */
     }
+
     .ticket, .beret, .bubble {
       position: absolute;
       display: block;
-      pointer-events: auto; /* клики работают */
+      pointer-events: none;
+      z-index: 50;
     }
+
     .ticket img, .beret img {
-      width: 60px;
-      opacity: 0.9;
+      width: 100px;
+      opacity: 0.95;
     }
-    .bubble {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.5);
-      box-shadow: 0 0 10px rgba(255,255,255,0.7);
-    }
+
     @keyframes fall {
-      0% { transform: translateY(-10%) scale(1); opacity: 1; }
-      100% { transform: translateY(110vh) scale(1.1); opacity: 0; }
+      from { transform: translateY(-10vh) rotate(0deg); }
+      to   { transform: translateY(110vh) rotate(360deg); }
     }
+
     @keyframes rise {
-      0% { transform: translateY(110vh) scale(0.5); opacity: 0.8; }
-      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+      from { transform: translateY(110vh) scale(0.5); opacity: 0.8; }
+      to   { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+    }
+
+    .bubble {
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(3px);
     }
   </style>
 </head>
 <body>
-  <!-- Верхняя картинка -->
-  <div class="stack layer-topimg">
-    <div class="top-image"><img src="foto9.png" alt="Foto9"></div>
-  </div>
+  <!-- Твои монстры, фон, чекер и тени остаются как раньше -->
 
-  <!-- Чекер -->
-  <div class="stack layer-checker">
-    <div class="checker">
-      <div class="row">
-        <input type="text" id="walletInput" placeholder="Enter wallet address" />
-        <button id="checkBtn" onclick="checkWallet()">
-          <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
-        </button>
-      </div>
-      <div id="result"></div>
-    </div>
-  </div>
-
-  <!-- Тени монстров -->
-  <div class="monsters-shadow layer-monsters-shadow">
-    <div><img src="game7.png" alt="Shadow Left"></div>
-    <div><img src="game6.png" alt="Shadow Center"></div>
-    <div><img src="game8.png" alt="Shadow Right"></div>
-  </div>
-
-  <!-- Монстры -->
-  <div class="monsters layer-monsters">
-    <div><img src="game7.png" alt="Monster Left"></div>
-    <div><img src="game6.png" alt="Monster Center"></div>
-    <div><img src="game8.png" alt="Monster Right"></div>
-  </div>
-
-  <!-- Эффекты -->
-  <div class="fx-container layer-fx" id="fx"></div>
+  <!-- Контейнер для спецэффектов -->
+  <div class="fx-container" id="fx"></div>
 
   <script>
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
-    let whitelist = [];
+    const fx = document.getElementById("fx");
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const checkBtn = document.getElementById("checkBtn");
-      if (checkBtn) checkBtn.disabled = true;
-
-      loadWhitelist().then(() => {
-        if (checkBtn) checkBtn.disabled = false;
-      });
-
-      document.getElementById("walletInput").addEventListener("keypress", e => {
-        if (e.key === "Enter") checkWallet();
-      });
-
-      startFX(); // эффекты
-    });
-
-    async function loadWhitelist() {
-      try {
-        const bust = "&t=" + Date.now();
-        const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + bust);
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const csvText = await res.text();
-        whitelist = csvText
-          .split(/\r?\n/)
-          .map(line => line.split(",")[0])
-          .map(addr => (addr || "").trim().replace(/['"]/g, "").toLowerCase())
-          .filter(addr => addr.length > 0);
-        whitelist = Array.from(new Set(whitelist));
-      } catch (err) {
-        console.error("Whitelist load error:", err);
-        document.getElementById("result").innerText = "Whitelist load error 😢";
-      }
+    function spawnTicket() {
+      const el = document.createElement("div");
+      el.className = "ticket";
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.top = "-15%";
+      el.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
+      el.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+      el.innerHTML = `<img src="haha_20.png" alt="ticket">`;
+      fx.appendChild(el);
+      setTimeout(() => el.remove(), 5000);
     }
 
-    function checkWallet() {
-      const inputEl = document.getElementById("walletInput");
-      const resultEl = document.getElementById("result");
-      if (!inputEl || !resultEl) return;
+    function spawnBeret() {
+      const el = document.createElement("div");
+      el.className = "beret";
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.top = "-15%";
+      el.style.transform = `rotate(${Math.random() * 360}deg)`;
+      el.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+      el.innerHTML = `<img src="d90a2fde-b324-4ffb-adb7-c98e1b7f4ab1.png" alt="beret">`;
+      fx.appendChild(el);
+      setTimeout(() => el.remove(), 5000);
+    }
 
-      const input = inputEl.value.trim().toLowerCase();
-      inputEl.value = ""; 
+    function spawnBubble() {
+      const el = document.createElement("div");
+      el.className = "bubble";
+      const size = 20 + Math.random() * 40;
+      el.style.width = size + "px";
+      el.style.height = size + "px";
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.top = "110%";
+      el.style.animation = `rise ${4 + Math.random() * 3}s linear forwards`;
+      fx.appendChild(el);
+      setTimeout(() => el.remove(), 7000);
+    }
 
-      if (!input) {
-        resultEl.innerText = "Enter wallet address!";
-        resultEl.style.color = "#ffaaaa";
-        if (navigator.vibrate) navigator.vibrate(200);
-        return;
-      }
-
-      if (whitelist.includes(input)) {
-        resultEl.innerText = "✅ Address is in whitelist!";
-        resultEl.style.color = "#00ff88";
+    // хаотичный поток
+    function randomSpawn() {
+      const r = Math.random();
+      if (r < 0.4) {
+        spawnTicket();
+      } else if (r < 0.8) {
+        spawnBeret();
       } else {
-        resultEl.innerText = "❌ Address not found in whitelist.";
-        resultEl.style.color = "#ff6688";
+        spawnBubble();
       }
+      setTimeout(randomSpawn, 300 + Math.random() * 700);
     }
 
-    /* ===== FX ===== */
-    function startFX() {
-      const fx = document.getElementById("fx");
-
-      function spawnTicket() {
-        const el = document.createElement("div");
-        el.className = "ticket";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.top = "-15%";
-        el.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
-        el.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
-        el.innerHTML = `<img src="ticket.png" alt="ticket">`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), 5000);
-      }
-
-      function spawnBeret() {
-        const el = document.createElement("div");
-        el.className = "beret";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.top = "-15%";
-        el.style.transform = `rotate(${Math.random() * 360}deg)`;
-        el.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
-        el.innerHTML = `<img src="beret_red.png" alt="red beret">`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), 5000);
-      }
-
-      function spawnBubble() {
-        const el = document.createElement("div");
-        el.className = "bubble";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.bottom = "-5%";
-        el.style.width = 10 + Math.random() * 25 + "px";
-        el.style.height = el.style.width;
-        el.style.animation = `rise ${4 + Math.random() * 3}s ease-in forwards`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), 8000);
-      }
-
-      function randomSpawn() {
-        const choice = Math.random();
-        if (choice < 0.4) {
-          spawnTicket();
-        } else if (choice < 0.8) {
-          spawnBeret();
-        } else {
-          spawnBubble();
-        }
-        setTimeout(randomSpawn, 200 + Math.random() * 600);
-      }
-
-      randomSpawn();
-    }
+    randomSpawn();
   </script>
 </body>
 </html>
