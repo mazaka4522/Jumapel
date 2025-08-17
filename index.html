@@ -172,40 +172,9 @@
   <div class="fx-container layer-fx" id="fx"></div>
 
 <script>
-  // ==== Падение билетов и беретов ====
+  // ==== Падение билетов и беретов ==== 
   function startFX() {
-    const fx = document.getElementById("fx");
-
-    function spawnTicket() {
-      const el = document.createElement("div");
-      el.className = "ticket";
-      el.style.left = Math.random() * 100 + "vw";
-      el.style.top = "-10%";
-      const duration = 2 + Math.random() * 2;
-      const rotationStart = Math.random() * 360;
-      el.style.animation = `fallAndSpin ${duration}s linear forwards`;
-      el.style.transform = `rotate(${rotationStart}deg)`;
-      el.innerHTML = `<img src="haha_20.png" alt="ticket">`;
-      fx.appendChild(el);
-      setTimeout(() => el.remove(), duration * 1000 + 500);
-    }
-
-    function spawnBeret() {
-      const el = document.createElement("div");
-      el.className = "beret";
-      el.style.left = Math.random() * 100 + "vw";
-      el.style.top = "-10%";
-      const duration = 2 + Math.random() * 2;
-      const rotationStart = Math.random() * 360;
-      el.style.animation = `fallAndSpin ${duration}s linear forwards`;
-      el.style.transform = `rotate(${rotationStart}deg)`;
-      el.innerHTML = `<img src="bar_out_18.png" alt="beret">`;
-      fx.appendChild(el);
-      setTimeout(() => el.remove(), duration * 1000 + 500);
-    }
-
-    setInterval(spawnTicket, 600);
-    setInterval(spawnBeret, 900);
+    ...
   }
 
   // ==== Чекер ====
@@ -213,7 +182,7 @@
 
   async function loadWhitelist() {
     try {
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA1YGEufZbbMMkrdUuXP23wGdkbz9ftV-DiLiEB0psYcN_R9AKXRs7CYQburIuyReG/exec";
+      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDdWAobD6b4h7NUQE8ytZhzcRjRb2Ub1FJXbbHPRWDVFBnx2xSAJH_PRmRQgEx9PoS/exec";
       const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
       whitelist = await res.json();
       console.log("Whitelist loaded:", whitelist);
@@ -252,6 +221,7 @@
   
 </body>
 </html>
+
 
 
 
