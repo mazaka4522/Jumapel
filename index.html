@@ -1,205 +1,304 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Jumapel Nads | Checker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    :root {
-      --page-w: 450px; /* ширина контейнера (input + кнопка) */
-    }
+<meta charset="UTF-8" />
+<title>Jumapel Nads | Checker</title>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<style>
+:root {
+  --page-w: 450px;
+}
 
-    html, body {
-      margin: 0;
-      padding: 0;
-      height: 100%;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-      color: #fff;
-      overflow: hidden;
-    }
+html, body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  font-family: 'Segoe UI', sans-serif;
+  background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+  color: #fff;
+  overflow: hidden;
+}
 
-    .layer-fx { z-index: 2; pointer-events: none; }
-    .layer-monsters-shadow { z-index: 0; pointer-events: none; }
-    .layer-monsters { z-index: 1; pointer-events: none; }
-    .layer-checker { z-index: 5; }
-    .layer-topimg { z-index: 6; }
+/* Слои */
+.layer-fx { z-index: 2; pointer-events: none; }
+.layer-monsters-shadow { z-index: 0; pointer-events: none; }
+.layer-monsters { z-index: 1; pointer-events: none; }
+.layer-checker { z-index: 5; }
+.layer-topimg { z-index: 6; }
 
-    .stack {
-      position: relative;
-      width: var(--page-w);
-      margin: 20px auto 0 auto;
-    }
+.stack {
+  position: relative;
+  width: var(--page-w);
+  margin: 20px auto 0 auto;
+}
 
-    .top-image img {
-      width: 100%;
-      display: block;
-    }
+.top-image img {
+  width: 100%;
+  display: block;
+}
 
-    /* Чекер */
-    .checker {
-      position: relative;
-      width: var(--page-w);
-      margin: 0 auto 10px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      text-align: center;
-    }
+.checker {
+  position: relative;
+  width: var(--page-w);
+  margin: 0 auto 10px auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
 
-    .checker .row {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 10px;
-    }
+.checker .row {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 10px;
+}
 
-    #walletInput {
-      width: 300px;
-      padding: 12px 15px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
+#walletInput {
+  width: 300px;
+  padding: 12px 15px;
+  font-size: 16px;
+  border-radius: 10px;
+  border: none;
+  outline: none;
+}
 
-    #checkBtn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-    }
+#checkBtn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+}
 
-    .beret-btn {
-      width: 140px;
-      transition: transform 0.2s ease;
-      display: block;
-    }
-    .beret-btn:hover {
-      transform: scale(1.05) rotate(-2deg);
-    }
+.beret-btn {
+  width: 140px;
+  transition: transform 0.2s ease;
+  display: block;
+}
+.beret-btn:hover {
+  transform: scale(1.05) rotate(-2deg);
+}
 
-    #result {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      min-height: 22px;
-    }
+#result {
+  text-align: center;
+  margin-top: 10px;
+  font-size: 18px;
+  font-weight: bold;
+  min-height: 22px;
+}
 
-    /* Далее — вся анимация пузырей, билетов, монстров — я оставила как есть 🎉 */
+/* Вибрация при ошибке */
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
+.shake {
+  animation: shake 0.4s;
+}
 
-    /* FX / Monstr Styles ... (оставлено полностью из оригинала) */
-    /* ... ... ... (твоя длинная CSS часть здесь без изменений) */
+/* ===== FX, пузырьки, билеты, монстры ===== */
+.fx-field {
+  position: fixed;
+  left: 0;
+  bottom: -120px;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
 
-  </style>
+.fx-item {
+  position: absolute;
+  bottom: 0;
+  display: block;
+}
+
+.ticket-item {
+  animation: fly linear infinite;
+}
+
+@keyframes fly {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(-150px) rotate(360deg); opacity: 0; }
+}
+
+/* Пример для пузырей */
+.bubble {
+  width: 20px;
+  height: 20px;
+  background: rgba(255,255,255,0.3);
+  border-radius: 50%;
+  position: absolute;
+  bottom: 0;
+  animation: rise linear infinite;
+}
+@keyframes rise {
+  0% { transform: translateY(100vh); opacity: 0; }
+  50% { opacity: 1; }
+  100% { transform: translateY(-150px); opacity: 0; }
+}
+
+/* Монстры */
+.monsters-shadow, .monsters {
+  position: absolute;
+  width: 100%;
+  bottom: 0;
+  display: flex;
+  justify-content: space-between;
+  pointer-events: none;
+}
+
+.shadow img, .monster img {
+  width: 120px;
+  transition: transform 0.2s ease;
+}
+
+.shadow.left, .monster.left { margin-left: 20px; }
+.shadow.right, .monster.right { margin-right: 20px; }
+
+/* Все анимации монстров можно добавить здесь, например */
+.monster img {
+  animation: monsterBounce 2s infinite ease-in-out;
+}
+
+@keyframes monsterBounce {
+  0%,100% { transform: translateY(0); }
+  50% { transform: translateY(-10px); }
+}
+
+/* FX items примеры */
+.fx-item img {
+  width: var(--size, 80px);
+  animation-duration: var(--dur, 5s);
+  animation-delay: var(--delay, 0s);
+  left: var(--x, 50vw);
+}
+</style>
 </head>
+
 <body>
-  <div class="stack layer-topimg">
-    <div class="top-image">
-      <img src="foto9.png" alt="Foto9" />
+<!-- Верхняя картинка -->
+<div class="stack layer-topimg">
+  <div class="top-image">
+    <img src="foto9.png" alt="Foto9" />
+  </div>
+</div>
+
+<!-- Чекер -->
+<div class="stack layer-checker">
+  <div class="checker">
+    <div class="row">
+      <input type="text" id="walletInput" placeholder="Enter wallet address" />
+      <button id="checkBtn" onclick="checkWallet()">
+        <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
+      </button>
     </div>
+    <div id="result"></div>
   </div>
+</div>
 
-  <div class="stack layer-checker">
-    <div class="checker">
-      <div class="row">
-        <input type="text" id="walletInput" placeholder="Enter wallet address" />
-        <button id="checkBtn" onclick="checkWallet()">
-          <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
-        </button>
-      </div>
-      <div id="result"></div>
-    </div>
-  </div>
+<!-- FX элементы (пузырьки, билеты, береты) -->
+<div class="fx-field layer-fx" aria-hidden="true">
+  <!-- Примеры билетов -->
+  <div class="fx-item ticket-item" style="--x:10vw;  --delay:0.5s; --dur:7.5s; --size:110px;"><img src="haha_20.png" alt=""></div>
+  <div class="fx-item ticket-item" style="--x:30vw;  --delay:2.2s; --dur:6.2s; --size:120px;"><img src="haha_20.png" alt=""></div>
+  <div class="fx-item ticket-item" style="--x:60vw;  --delay:1.1s; --dur:5.2s; --size:100px;"><img src="haha_20.png" alt=""></div>
+  <div class="fx-item ticket-item" style="--x:80vw;  --delay:3.0s; --dur:7s; --size:130px;"><img src="haha_20.png" alt=""></div>
 
-  <!-- Ниже вставлены FX вылеты -->
-  <div class="fx-field layer-fx" aria-hidden="true">
-    <!-- Билеты -->
-    <div class="fx-item ticket-item" style="--x:10vw;  --delay:0.5s; --dur:7.5s; --size:110px;"><img src="haha_20.png" alt=""></div>
-    <div class="fx-item ticket-item" style="--x:30vw;  --delay:2.2s; --dur:6.2s; --size:120px;"><img src="haha_20.png" alt=""></div>
-    <!-- ... (все остальные fx-item как были) -->
-  </div>
+  <!-- Примеры пузырей -->
+  <div class="fx-item bubble" style="--x:15vw; --delay:0s; --dur:8s;"></div>
+  <div class="fx-item bubble" style="--x:45vw; --delay:1s; --dur:6s;"></div>
+  <div class="fx-item bubble" style="--x:75vw; --delay:2s; --dur:7s;"></div>
+</div>
 
-  <div class="monsters-shadow layer-monsters-shadow">
-    <div class="shadow left"><img src="game7.png" alt="Shadow Left"></div>
-    <div class="shadow center"><img src="game6.png" alt="Shadow Center"></div>
-    <div class="shadow right"><img src="game8.png" alt="Shadow Right"></div>
-  </div>
+<!-- Тени монстров -->
+<div class="monsters-shadow layer-monsters-shadow">
+  <div class="shadow left"><img src="game7.png" alt="Shadow Left"></div>
+  <div class="shadow center"><img src="game6.png" alt="Shadow Center"></div>
+  <div class="shadow right"><img src="game8.png" alt="Shadow Right"></div>
+</div>
 
-  <div class="monsters layer-monsters">
-    <div class="monster left"><img src="game7.png" alt="Monster Left"></div>
-    <div class="monster center"><img src="game6.png" alt="Monster Center"></div>
-    <div class="monster right"><img src="game8.png" alt="Monster Right"></div>
-  </div>
+<!-- Монстры -->
+<div class="monsters layer-monsters">
+  <div class="monster left"><img src="game7.png" alt="Monster Left"></div>
+  <div class="monster center"><img src="game6.png" alt="Monster Center"></div>
+  <div class="monster right"><img src="game8.png" alt="Monster Right"></div>
+</div>
 
-  <script>
-    const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
-    let whitelist = [];
+<script>
+const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
+let whitelist = [];
 
-    document.addEventListener("DOMContentLoaded", () => {
-      const checkBtn = document.getElementById("checkBtn");
-      if (checkBtn) checkBtn.disabled = true;
+document.addEventListener("DOMContentLoaded", () => {
+  const checkBtn = document.getElementById("checkBtn");
+  if (checkBtn) checkBtn.disabled = true;
 
-      loadWhitelist().then(() => {
-        if (checkBtn) checkBtn.disabled = false;
-      });
+  loadWhitelist().then(() => {
+    if (checkBtn) checkBtn.disabled = false;
+  });
 
-      document.getElementById("walletInput").addEventListener("keypress", e => {
-        if (e.key === "Enter") checkWallet();
-      });
-    });
+  document.getElementById("walletInput").addEventListener("keypress", e => {
+    if (e.key === "Enter") checkWallet();
+  });
+});
 
-    async function loadWhitelist() {
-      try {
-        const bust = "&t=" + Date.now();
-        const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + bust);
-        const res = await fetch(url, { cache: "no-store" });
-        if (!res.ok) throw new Error("HTTP " + res.status);
-        const csvText = await res.text();
-        whitelist = csvText
-          .split(/\r?\n/)
-          .map(line => line.split(",")[0])
-          .map(addr => (addr || "").trim().replace(/['"]/g, "").toLowerCase())
-          .filter(addr => addr.length > 0);
-        whitelist = Array.from(new Set(whitelist));
-        console.log("Whitelist loaded:", whitelist.length, "addresses");
-      } catch (err) {
-        console.error("Whitelist load error:", err);
-        const resultEl = document.getElementById("result");
-        if (resultEl) {
-          resultEl.innerText = "Whitelist load error 😢";
-          resultEl.style.color = "#ffaaaa";
-        }
-      }
+async function loadWhitelist() {
+  try {
+    const bust = "&t=" + Date.now();
+    const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + bust);
+    const res = await fetch(url, { cache: "no-store" });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    const csvText = await res.text();
+    whitelist = csvText
+      .split(/\r?\n/)
+      .map(line => line.split(",")[0])
+      .map(addr => (addr || "").trim().replace(/['"]/g, "").toLowerCase())
+      .filter(addr => addr.length > 0);
+    whitelist = Array.from(new Set(whitelist));
+    console.log("Whitelist loaded:", whitelist.length);
+  } catch (err) {
+    console.error("Whitelist load error:", err);
+    const resultEl = document.getElementById("result");
+    if (resultEl) {
+      resultEl.innerText = "Whitelist load error 😢";
+      resultEl.style.color = "#ffaaaa";
     }
+  }
+}
 
-    function checkWallet() {
-      const inputEl = document.getElementById("walletInput");
-      const resultEl = document.getElementById("result");
-      if (!inputEl || !resultEl) return;
+function checkWallet() {
+  const inputEl = document.getElementById("walletInput");
+  const resultEl = document.getElementById("result");
+  if (!inputEl || !resultEl) return;
 
-      const input = inputEl.value.trim().toLowerCase();
+  const input = inputEl.value.trim().toLowerCase();
 
-      if (!input) {
-        resultEl.innerText = "Enter wallet address!";
-        resultEl.style.color = "#ffaaaa";
-        return;
-      }
+  if (!input) {
+    resultEl.innerText = "Enter wallet address!";
+    resultEl.style.color = "#ffaaaa";
+    return;
+  }
 
-      if (whitelist.includes(input)) {
-        resultEl.innerText = "✅ Address is in whitelist!";
-        resultEl.style.color = "#00ff88";
-      } else {
-        resultEl.innerText = "❌ Address not found in whitelist.";
-        resultEl.style.color = "#ff6688";
-      }
+  if (whitelist.includes(input)) {
+    resultEl.innerText = "✅ Address is in whitelist!";
+    resultEl.style.color = "#00ff88";
+  } else {
+    resultEl.innerText = "❌ Address not found in whitelist.";
+    resultEl.style.color = "#ff6688";
 
-      // Очистка и фокус
-      inputEl.value = "";
-      inputEl.focus();
-    }
-  </script>
+    // Добавляем вибрацию
+    inputEl.classList.add("shake");
+    setTimeout(() => inputEl.classList.remove("shake"), 400);
+  }
+
+  // Очистка поля
+  inputEl.value = "";
+  inputEl.focus();
+}
+</script>
 </body>
 </html>
