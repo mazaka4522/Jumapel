@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8" />
   <title>Jumapel Nads | Checker</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
+    :root {
+      --page-w: 450px; /* ширина контейнера (input + кнопка) */
+    }
+
     html, body {
       margin: 0;
       padding: 0;
@@ -11,45 +16,53 @@
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
       color: #fff;
-      overflow: hidden;
+      overflow: hidden; /* чтобы вылетающие элементы уходили за экран */
     }
 
-    /* контейнер чекера */
-    .checker-container {
+    /* ====== СЛОИ (z-index) ====== */
+    /* 0 — тени монстров, 1 — монстры, 2 — фоновые «вылеты», 5 — чекер, 6 — верхняя картинка */
+    .layer-fx { z-index: 2; pointer-events: none; }
+    .layer-monsters-shadow { z-index: 0; pointer-events: none; }
+    .layer-monsters { z-index: 1; pointer-events: none; }
+    .layer-checker { z-index: 5; }
+    .layer-topimg { z-index: 6; }
+
+    /* ====== КОНТЕЙНЕР ЦЕНТРА ====== */
+    .stack {
+      position: relative;
+      width: var(--page-w);
+      margin: 20px auto 0 auto;
+    }
+
+    /* ====== ВЕРХНЯЯ КАРТИНКА ====== */
+    .top-image {
+      position: relative;
+      width: var(--page-w);
+      margin: 0 auto 10px auto;
+    }
+    .top-image img {
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* ====== ЧЕКЕР ====== */
+    .checker {
+      position: relative;
+      width: var(--page-w);
+      margin: 0 auto 10px auto;
       display: flex;
       flex-direction: column;
       align-items: center;
-      width: 450px; /* ширина input + кнопка */
-      margin: 20px auto 15px auto;
+      text-align: center;
     }
 
-    /* верхний билет (как был) */
-    .jumapel-pass {
+    .checker .row {
       width: 100%;
-      height: auto;
-      margin-bottom: 10px;
-      display: block;
-    }
-
-    /* СТАЦИОНАРНЫЙ ПАСС БЕЗ АНИМАЦИИ */
-    .ticket-static {
-      width: 100%;
-      margin: 10px 0;
-    }
-    .ticket-static img {
-      width: 100%;   /* = 450px, как ширина контейнера */
-      height: auto;  /* сохраняем пропорции */
-      display: block;
-    }
-
-    /* checker */
-    .checker-wrapper {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 10px;
-      margin-bottom: 10px;
-      width: 100%;
     }
 
     #walletInput {
@@ -71,6 +84,7 @@
     .beret-btn {
       width: 140px;
       transition: transform 0.2s ease;
+      display: block;
     }
     .beret-btn:hover {
       transform: scale(1.05) rotate(-2deg);
@@ -81,200 +95,267 @@
       margin-top: 10px;
       font-size: 18px;
       font-weight: bold;
+      min-height: 22px; /* чтобы не прыгало */
     }
 
-    /* (Удалены .ticket и анимации flyUp — больше не нужны) */
+    /* ====== ВЕЧНЫЕ ВЫЛЕТЫ (БИЛЕТЫ, БЕРЕТЫ, ПУЗЫРИ) ====== */
+    .fx-field {
+      position: fixed;
+      left: 0;
+      bottom: -120px; /* старт ниже экрана */
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+    }
 
-    /* flying berets */
-    .beret-fly {
+    /* Общая «частица» */
+    .fx-item {
       position: absolute;
-      bottom: -100px;
-      z-index: 1;
+      bottom: -120px;
+      left: 0;
+      transform: translateX(var(--x, 0)) translateY(0) rotate(0deg);
+      opacity: 0;
+      animation-iteration-count: infinite;
+      animation-timing-function: linear;
+      animation-fill-mode: forwards;
+      will-change: transform, opacity;
+      pointer-events: none;
     }
-    .beret-fly img {
-      width: 100px;
-      animation: flyBeret 8s linear infinite;
+
+    /* БИЛЕТЫ */
+    .ticket-item img {
+      width: var(--size, 110px);
+      height: auto;
+      display: block;
+    }
+    .ticket-item {
+      animation-name: flyTicket;
+      animation-duration: var(--dur, 7s);
+      animation-delay: var(--delay, 0s);
+    }
+    @keyframes flyTicket {
+      0%   { transform: translateX(var(--x, 0)) translateY(0) rotate(0deg); opacity: 0; }
+      5%   { opacity: 1; }
+      100% { transform: translateX(calc(var(--x, 0) + 120px)) translateY(-110vh) rotate(360deg); opacity: 0; }
+    }
+
+    /* БЕРЕТЫ */
+    .beret-item img {
+      width: var(--size, 95px);
+      height: auto;
+      display: block;
+    }
+    .beret-item {
+      animation-name: flyBeret;
+      animation-duration: var(--dur, 9s);
+      animation-delay: var(--delay, 0s);
     }
     @keyframes flyBeret {
-      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-120vh) translateX(-150px) rotate(-720deg); opacity: 0; }
+      0%   { transform: translateX(var(--x, 0)) translateY(0) rotate(0deg); opacity: 0; }
+      10%  { opacity: 1; }
+      100% { transform: translateX(calc(var(--x, 0) - 160px)) translateY(-120vh) rotate(-720deg); opacity: 0; }
     }
 
-    /* bubbles */
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      width: 40px;
-      height: 40px;
-      background: rgba(255,255,255,0.2);
+    /* ПУЗЫРИ */
+    .bubble-item {
+      width: var(--size, 40px);
+      height: var(--size, 40px);
+      background: rgba(255,255,255,0.22);
       border-radius: 50%;
-      animation: bubbleFloat 12s linear infinite;
+      animation-name: flyBubble;
+      animation-duration: var(--dur, 12s);
+      animation-delay: var(--delay, 0s);
+      box-shadow: inset -6px -10px 18px rgba(255,255,255,0.25), inset 6px 10px 18px rgba(0,0,0,0.08);
+      backdrop-filter: blur(2px);
     }
-    @keyframes bubbleFloat {
-      0% { transform: translateY(0) scale(1); opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
+    @keyframes flyBubble {
+      0%   { transform: translateX(var(--x, 0)) translateY(0) scale(1); opacity: 0.4; }
+      50%  { opacity: 0.9; }
+      100% { transform: translateX(calc(var(--x, 0) + 40px)) translateY(-110vh) scale(1.6); opacity: 0; }
     }
 
-    /* shadow monsters */
-    .shadow-monsters {
+    /* ====== МОНСТРЫ ====== */
+    .monsters-shadow,
+    .monsters {
       position: fixed;
-      bottom: -12%;
+      bottom: -15%;
+      left: 0;
       width: 100%;
-      height: 65vh;
-      pointer-events: none;
+      height: 60vh;
       display: flex;
       justify-content: space-between;
       align-items: flex-end;
-      z-index: 0; /* под всем */
-      opacity: 0.4;
+      pointer-events: none;
     }
-    .shadow img {
-      height: 100%;
+
+    .monsters-shadow {
+      bottom: -12%;
+      height: 65vh;
+      opacity: 0.4;
       filter: grayscale(1) brightness(0.3) blur(2px);
+    }
+    .monsters-shadow .shadow {
+      height: 100%;
+    }
+    .monsters-shadow img {
+      height: 100%;
       opacity: 0.7;
     }
-    .shadow.center img {
+    .monsters-shadow .center img {
       animation: shadowFloat 10s ease-in-out infinite;
     }
     @keyframes shadowFloat {
       0%, 100% { transform: translateY(5%); }
-      50% { transform: translateY(-5%); }
+      50%      { transform: translateY(-5%); }
     }
 
-    /* main monsters */
-    .bottom-monsters {
-      position: fixed;
-      bottom: -15%;
-      width: 100%;
-      height: 60vh;
-      pointer-events: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      z-index: 1;
-    }
-    .monster {
+    .monsters .monster {
       position: relative;
       height: 100%;
     }
-    .monster img {
+    .monsters img {
       height: 100%;
       transform-origin: bottom center;
       animation: monsterPeek 5s ease-in-out infinite;
     }
-    .monster.center {
+    .monsters .center {
       position: absolute;
       left: 50%;
       transform: translateX(-50%);
       height: 100%;
     }
-    .monster.center img {
+    .monsters .center img {
       animation: monsterPeekCenter 5s ease-in-out infinite;
     }
     @keyframes monsterPeek {
       0%, 100% { transform: translateY(15%) rotate(0deg); }
-      50% { transform: translateY(0) rotate(3deg); }
+      50%      { transform: translateY(0) rotate(3deg); }
     }
     @keyframes monsterPeekCenter {
       0%, 100% { transform: translateY(20%) scale(1); }
-      50% { transform: translateY(0) scale(1.05); }
+      50%      { transform: translateY(0) scale(1.05); }
     }
   </style>
 </head>
 <body>
 
-  <!-- контейнер с билетом и чекером -->
-  <div class="checker-container">
-    <!-- билет сверху (оставил как был, можно убрать при желании) -->
-    <img src="jumapel_pass.png" alt="Jumapel Pass" class="jumapel-pass" />
-
-    <!-- СТАЦИОНАРНЫЙ ПАСС БЕЗ АНИМАЦИИ, ШИРИНОЙ КАК ЧЕКЕР -->
-    <div class="ticket-static">
-      <img src="haha_20.png" alt="Static Pass" />
-    </div>
-
-    <!-- сам чекер -->
-    <div class="checker-wrapper">
-      <input type="text" id="walletInput" placeholder="Enter wallet address" />
-      <button id="checkBtn" onclick="checkWallet()">
-        <img src="bar_out_18.png" alt="Beret" class="beret-btn" />
-      </button>
+  <!-- ВЕРХНЯЯ КАРТИНКА (над всем) -->
+  <div class="stack layer-topimg">
+    <div class="top-image">
+      <!-- замени на свой файл при необходимости -->
+      <img src="foto9.png" alt="Top Image (foto9)" />
     </div>
   </div>
 
-  <div id="result"></div>
-
-  <!-- УДАЛЕНО: flying tickets с анимацией -->
-
-  <!-- flying berets -->
-  <div class="beret-fly" style="left:20%;">
-    <img src="bar_out_18.png" alt="Flying Beret" style="animation-delay:2s;">
-  </div>
-  <div class="beret-fly" style="left:60%;">
-    <img src="bar_out_18.png" alt="Flying Beret" style="animation-delay:5s;">
-  </div>
-
-  <!-- bubbles -->
-  <div class="bubble" style="left:10%; animation-duration:15s;"></div>
-  <div class="bubble" style="left:50%; animation-duration:12s;"></div>
-  <div class="bubble" style="left:80%; animation-duration:18s;"></div>
-
-  <!-- shadow monsters -->
-  <div class="shadow-monsters">
-    <div class="shadow left">
-      <img src="game7.png" alt="Shadow monster left">
-    </div>
-    <div class="shadow center">
-      <img src="game6.png" alt="Shadow monster center">
-    </div>
-    <div class="shadow right">
-      <img src="game8.png" alt="Shadow monster right">
+  <!-- ЧЕКЕР (над монстрами, ниже верхней картинки) -->
+  <div class="stack layer-checker">
+    <div class="checker">
+      <div class="row">
+        <input type="text" id="walletInput" placeholder="Enter wallet address" />
+        <button id="checkBtn" onclick="checkWallet()">
+          <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
+        </button>
+      </div>
+      <div id="result"></div>
     </div>
   </div>
 
-  <!-- main monsters -->
-  <div class="bottom-monsters">
-    <div class="monster left">
-      <img src="game7.png" alt="Monster left">
-    </div>
-    <div class="monster center">
-      <img src="game6.png" alt="Monster center">
-    </div>
-    <div class="monster right">
-      <img src="game8.png" alt="Monster right">
-    </div>
+  <!-- Бесконечные вылеты (фон), идут ЗА чекером -->
+  <div class="fx-field layer-fx" aria-hidden="true">
+    <!-- БИЛЕТЫ -->
+    <div class="fx-item ticket-item" style="--x:10vw;  --delay:0.5s; --dur:7.5s; --size:110px;"><img src="haha_20.png" alt=""></div>
+    <div class="fx-item ticket-item" style="--x:30vw;  --delay:2.2s; --dur:6.2s; --size:120px;"><img src="haha_20.png" alt=""></div>
+    <div class="fx-item ticket-item" style="--x:55vw;  --delay:1.4s; --dur:8.4s; --size:105px;"><img src="haha_20.png" alt=""></div>
+    <div class="fx-item ticket-item" style="--x:72vw;  --delay:3.1s; --dur:7.0s; --size:115px;"><img src="haha_20.png" alt=""></div>
+    <div class="fx-item ticket-item" style="--x:85vw;  --delay:4.0s; --dur:6.6s; --size:100px;"><img src="haha_20.png" alt=""></div>
+
+    <!-- БЕРЕТЫ (красные) -->
+    <div class="fx-item beret-item"  style="--x:18vw;  --delay:1.0s; --dur:9.2s; --size:95px;"><img src="bar_out_18.png" alt=""></div>
+    <div class="fx-item beret-item"  style="--x:42vw;  --delay:2.8s; --dur:7.8s; --size:100px;"><img src="bar_out_18.png" alt=""></div>
+    <div class="fx-item beret-item"  style="--x:63vw;  --delay:0.7s; --dur:9.8s; --size:90px;"><img src="bar_out_18.png" alt=""></div>
+    <div class="fx-item beret-item"  style="--x:77vw;  --delay:3.6s; --dur:8.6s; --size:92px;"><img src="bar_out_18.png" alt=""></div>
+
+    <!-- ПУЗЫРИ -->
+    <div class="fx-item bubble-item" style="--x:8vw;   --delay:0.4s; --dur:13s; --size:38px;"></div>
+    <div class="fx-item bubble-item" style="--x:25vw;  --delay:1.9s; --dur:15s; --size:44px;"></div>
+    <div class="fx-item bubble-item" style="--x:40vw;  --delay:3.0s; --dur:12s; --size:36px;"></div>
+    <div class="fx-item bubble-item" style="--x:58vw;  --delay:0.8s; --dur:16s; --size:50px;"></div>
+    <div class="fx-item bubble-item" style="--x:73vw;  --delay:2.5s; --dur:14s; --size:42px;"></div>
+    <div class="fx-item bubble-item" style="--x:90vw;  --delay:4.0s; --dur:18s; --size:46px;"></div>
+  </div>
+
+  <!-- ТЕНИ МОНСТРОВ -->
+  <div class="monsters-shadow layer-monsters-shadow">
+    <div class="shadow left"><img src="game7.png" alt="Shadow Left"></div>
+    <div class="shadow center"><img src="game6.png" alt="Shadow Center"></div>
+    <div class="shadow right"><img src="game8.png" alt="Shadow Right"></div>
+  </div>
+
+  <!-- МОНСТРЫ (выглядывают из экрана) -->
+  <div class="monsters layer-monsters">
+    <div class="monster left"><img src="game7.png" alt="Monster Left"></div>
+    <div class="monster center"><img src="game6.png" alt="Monster Center"></div>
+    <div class="monster right"><img src="game8.png" alt="Monster Right"></div>
   </div>
 
   <script>
+    // ---- Настройки источника белого списка ----
     const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
     let whitelist = [];
 
-    const checkBtn = document.getElementById("checkBtn");
-    checkBtn.disabled = true;
+    // Обеспечим, что код запускается после загрузки DOM
+    document.addEventListener("DOMContentLoaded", () => {
+      // Кнопка может быть ещё не прогружена, подстрахуемся
+      const checkBtn = document.getElementById("checkBtn");
+      if (checkBtn) checkBtn.disabled = true;
 
+      loadWhitelist().then(() => {
+        if (checkBtn) checkBtn.disabled = false;
+      });
+
+      document.getElementById("walletInput").addEventListener("keypress", e => {
+        if (e.key === "Enter") checkWallet();
+      });
+    });
+
+    // Загружает CSV, всегда свежий (без кэша)
     async function loadWhitelist() {
       try {
-        const res = await fetch("https://corsproxy.io/?" + encodeURIComponent(SHEET_URL));
+        const bust = "&t=" + Date.now(); // кэш-бастер, чтобы видеть новые адреса сразу
+        const url = "https://corsproxy.io/?" + encodeURIComponent(SHEET_URL + bust);
+
+        const res = await fetch(url, { cache: "no-store" });
         if (!res.ok) throw new Error("HTTP " + res.status);
 
         const csvText = await res.text();
-        whitelist = csvText.split("\n")
+
+        // Разбор CSV: берём первый столбец, чистим кавычки/пробелы/регистры
+        whitelist = csvText
+          .split(/\r?\n/)
           .map(line => line.split(",")[0])
-          .map(addr => addr.trim().replace(/['"]/g, "").toLowerCase())
+          .map(addr => (addr || "").trim().replace(/['"]/g, "").toLowerCase())
           .filter(addr => addr.length > 0);
 
-        checkBtn.disabled = false;
+        // Уберём дубликаты, если вдруг
+        whitelist = Array.from(new Set(whitelist));
+
         console.log("Whitelist загружен:", whitelist.length, "адресов");
       } catch (err) {
         console.error("Whitelist load error:", err);
-        document.getElementById("result").innerText = "Whitelist load error 😢";
+        const resultEl = document.getElementById("result");
+        if (resultEl) {
+          resultEl.innerText = "Whitelist load error 😢";
+          resultEl.style.color = "#ffaaaa";
+        }
       }
     }
 
     function checkWallet() {
-      const input = document.getElementById("walletInput").value.trim().toLowerCase();
+      const inputEl = document.getElementById("walletInput");
       const resultEl = document.getElementById("result");
+      if (!inputEl || !resultEl) return;
+
+      const input = inputEl.value.trim().toLowerCase();
 
       if (!input) {
         resultEl.innerText = "Enter wallet address!";
@@ -284,18 +365,12 @@
 
       if (whitelist.includes(input)) {
         resultEl.innerText = "✅ Address is in whitelist!";
-        resultEl.style.color = "#0f0";
+        resultEl.style.color = "#00ff88";
       } else {
         resultEl.innerText = "❌ Address not found in whitelist.";
-        resultEl.style.color = "#f55";
+        resultEl.style.color = "#ff6688";
       }
     }
-
-    document.getElementById("walletInput").addEventListener("keypress", e => {
-      if (e.key === "Enter") checkWallet();
-    });
-
-    loadWhitelist();
   </script>
 </body>
 </html>
