@@ -171,32 +171,43 @@
   <!-- Эффекты -->
   <div class="fx-container layer-fx" id="fx"></div>
 
- <script>
+<script>
   // ==== Падение билетов и беретов ====
   function startFX() {
     const fx = document.getElementById("fx");
 
-    function spawnFalling(src, cls) {
+    function spawnTicket() {
       const el = document.createElement("div");
-      el.className = cls;
+      el.className = "ticket";
       el.style.left = Math.random() * 100 + "vw";
       el.style.top = "-10%";
       const duration = 2 + Math.random() * 2;
       const rotationStart = Math.random() * 360;
       el.style.animation = `fallAndSpin ${duration}s linear forwards`;
       el.style.transform = `rotate(${rotationStart}deg)`;
-      el.innerHTML = `<img src="${src}" alt="${cls}">`;
+      el.innerHTML = `<img src="haha_20.png" alt="ticket">`;
       fx.appendChild(el);
       setTimeout(() => el.remove(), duration * 1000 + 500);
     }
 
-    setInterval(() => spawnFalling("haha_20.png", "ticket"), 600);
-    setInterval(() => spawnFalling("bar_out_18.png", "beret"), 900);
+    function spawnBeret() {
+      const el = document.createElement("div");
+      el.className = "beret";
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.top = "-10%";
+      const duration = 2 + Math.random() * 2;
+      const rotationStart = Math.random() * 360;
+      el.style.animation = `fallAndSpin ${duration}s linear forwards`;
+      el.style.transform = `rotate(${rotationStart}deg)`;
+      el.innerHTML = `<img src="bar_out_18.png" alt="beret">`;
+      fx.appendChild(el);
+      setTimeout(() => el.remove(), duration * 1000 + 500);
+    }
+
+    setInterval(spawnTicket, 600);
+    setInterval(spawnBeret, 900);
   }
 
-  document.addEventListener("DOMContentLoaded", startFX);
-
-  <script>
   // ==== Чекер ====
   let whitelist = [];
 
@@ -204,11 +215,11 @@
     try {
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwA1YGEufZbbMMkrdUuXP23wGdkbz9ftV-DiLiEB0psYcN_R9AKXRs7CYQburIuyReG/exec";
       const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
-      whitelist = await res.json(); // сразу массив
+      whitelist = await res.json();
       console.log("Whitelist loaded:", whitelist);
     } catch (err) {
       console.error("Whitelist load error:", err);
-      whitelist = []; // если ошибка, просто пустой список
+      whitelist = [];
     }
   }
 
@@ -233,10 +244,14 @@
     }
   }
 
-  document.addEventListener("DOMContentLoaded", loadWhitelist);
+  document.addEventListener("DOMContentLoaded", () => {
+    startFX();
+    loadWhitelist();
+  });
 </script>
   
 </body>
 </html>
+
 
 
