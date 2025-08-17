@@ -26,21 +26,25 @@
       display: block;
       pointer-events: none;
       z-index: 50;
+      will-change: transform;
     }
 
     .ticket img, .beret img {
       width: 100px;
       opacity: 0.95;
+      user-select: none;
     }
 
+    /* Ключевые кадры с боковым смещением */
     @keyframes fall {
-      from { transform: translateY(-10vh) rotate(0deg); }
-      to   { transform: translateY(110vh) rotate(360deg); }
+      from { transform: translate(0, -10vh) rotate(0deg); }
+      to   { transform: translate(var(--drift, 0px), 110vh) rotate(360deg); }
     }
 
     @keyframes rise {
-      from { transform: translateY(110vh) scale(0.5); opacity: 0.8; }
-      to   { transform: translateY(-20vh) scale(1.2); opacity: 0; }
+      from { transform: translate(0, 110vh) scale(0.5); opacity: 0.8; }
+      50%  { transform: translate(calc(var(--drift, 0px) * 0.5), 50vh) scale(1); }
+      to   { transform: translate(var(--drift, 0px), -20vh) scale(1.2); opacity: 0; }
     }
 
     .bubble {
@@ -51,8 +55,6 @@
   </style>
 </head>
 <body>
-  <!-- Твои монстры, фон, чекер и тени остаются как раньше -->
-
   <!-- Контейнер для спецэффектов -->
   <div class="fx-container" id="fx"></div>
 
@@ -64,8 +66,8 @@
       el.className = "ticket";
       el.style.left = Math.random() * 100 + "vw";
       el.style.top = "-15%";
-      el.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
-      el.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
+      el.style.setProperty("--drift", (Math.random() * 200 - 100) + "px"); // боковой снос
+      el.style.animation = `fall ${2 + Math.random() * 2}s ease-in forwards`;
       el.innerHTML = `<img src="haha_20.png" alt="ticket">`;
       fx.appendChild(el);
       setTimeout(() => el.remove(), 5000);
@@ -76,9 +78,9 @@
       el.className = "beret";
       el.style.left = Math.random() * 100 + "vw";
       el.style.top = "-15%";
-      el.style.transform = `rotate(${Math.random() * 360}deg)`;
-      el.style.animation = `fall ${2 + Math.random() * 2}s linear forwards`;
-      el.innerHTML = `<img src="d90a2fde-b324-4ffb-adb7-c98e1b7f4ab1.png" alt="beret">`;
+      el.style.setProperty("--drift", (Math.random() * 200 - 100) + "px");
+      el.style.animation = `fall ${2 + Math.random() * 2}s ease-in forwards`;
+      el.innerHTML = `<img src="bar_out_18.png" alt="beret">`;
       fx.appendChild(el);
       setTimeout(() => el.remove(), 5000);
     }
@@ -91,7 +93,8 @@
       el.style.height = size + "px";
       el.style.left = Math.random() * 100 + "vw";
       el.style.top = "110%";
-      el.style.animation = `rise ${4 + Math.random() * 3}s linear forwards`;
+      el.style.setProperty("--drift", (Math.random() * 100 - 50) + "px");
+      el.style.animation = `rise ${4 + Math.random() * 3}s ease-out forwards`;
       fx.appendChild(el);
       setTimeout(() => el.remove(), 7000);
     }
