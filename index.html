@@ -127,20 +127,19 @@
     }
 
     /* ===== Эффекты (Tickets, Berets, Bubbles) ===== */
-    .fx-container {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      pointer-events: none;
-    }
-    .ticket, .beret, .bubble {
-      position: absolute;
-      display: block;
-    }
-    .ticket img, .beret img {
-      width: 40px;
-      opacity: 0.8;
+  .fx-container {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 10; /* <-- выше монстров */
+}
+.ticket img, .beret img {
+  width: 80px; /* билеты крупнее */
+  opacity: 0.9;
+}
+
     }
     .bubble {
       width: 20px; height: 20px;
@@ -260,16 +259,30 @@
     function startFX() {
       const fx = document.getElementById("fx");
 
-      function spawnTicket() {
-        const el = document.createElement("div");
-        el.className = "ticket";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.top = "-10%";
-        el.style.animation = `fall ${6 + Math.random() * 4}s linear forwards`;
-        el.innerHTML = `<img src="ticket.png" alt="ticket">`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), 10000);
-      }
+    function spawnTicket() {
+  const el = document.createElement("div");
+  el.className = "ticket";
+  el.style.left = Math.random() * 100 + "vw";
+  el.style.top = "-10%";
+  el.style.transform = `rotate(${Math.random() * 60 - 30}deg)`; // случайный угол
+  el.style.animation = `fall ${6 + Math.random() * 4}s linear forwards`;
+  el.innerHTML = `<img src="ticket.png" alt="ticket">`;
+  fx.appendChild(el);
+  setTimeout(() => el.remove(), 10000);
+}
+
+function spawnBeret() {
+  const el = document.createElement("div");
+  el.className = "beret";
+  el.style.left = Math.random() * 100 + "vw";
+  el.style.top = "-10%";
+  el.style.transform = `rotate(${Math.random() * 360}deg)`; // случайный поворот
+  el.style.animation = `fall ${5 + Math.random() * 5}s linear forwards`;
+  el.innerHTML = `<img src="beret.png" alt="beret">`;
+  fx.appendChild(el);
+  setTimeout(() => el.remove(), 10000);
+}
+
 
       function spawnBeret() {
         const el = document.createElement("div");
@@ -299,3 +312,4 @@
   </script>
 </body>
 </html>
+
