@@ -218,7 +218,7 @@
 async function loadWhitelist() {
   try {
     // URL Web App, полученный при публикации скрипта
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxxxxxx/exec";
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhH8yWXzynq2iQ_P9EidxaBy8QmY26t_FiXiwi6gYbbsnlhYuWJ8qRZJKOQzz49sbx/exec";
 
     const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
     whitelist = await res.json(); // сразу получаем массив
@@ -252,5 +252,6 @@ async function loadWhitelist() {
   </script>
 </body>
 </html>
+
 
 
