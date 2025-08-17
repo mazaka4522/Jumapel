@@ -186,7 +186,7 @@
       <img src="bar_out_18.png" alt="Beret" class="beret-btn">
     </button>
   </div>
-  <div id="result"></div>
+  <div id="result">⌛ Loading whitelist...</div>
 
   <!-- flying tickets -->
   <div class="ticket" style="left:30%; animation-delay:1s;">
@@ -244,15 +244,28 @@ checkBtn.disabled = true;
 
 async function loadWhitelist() {
   try {
-    const res = await fetch("https://api.allorigins.win/raw?url=" + encodeURIComponent(SHEET_URL));
+    // Сначала пробуем через allorigins.org
+    let res = await fetch("https://api.allorigins.org/raw?url=" + encodeURIComponent(SHEET_URL));
+    
+    // Если сервер не ответил, пробуем напрямую
+    if (!res.ok) {
+      res = await fetch(SHEET_URL);
+    }
+
     const csvText = await res.text();
     whitelist = csvText.split("\n")
       .map(line => line.split(",")[0])
       .map(addr => addr.trim().replace(/['"]/g, "").toLowerCase())
       .filter(addr => addr.length > 0);
+
     checkBtn.disabled = false;
+    document.getElementById("result").innerText = "✅ Whitelist loaded!";
+    document.getElementById("result").style.color = "#0f0";
+
   } catch (err) {
     document.getElementById("result").innerText = "Whitelist load error 😢";
+    document.getElementById("result").style.color = "#f55";
+    console.error("Whitelist load failed:", err);
   }
 }
 
@@ -282,4 +295,3 @@ loadWhitelist();
 
 </body>
 </html>
-
