@@ -172,30 +172,95 @@
   <div class="fx-container layer-fx" id="fx"></div>
 
 <script>
-  // ==== Падение билетов и беретов ==== 
+  // ==== Эффекты (оставляем визуал как есть, без падений, чтобы не ломать скрипт) ====
   function startFX() {
-    ...
+    // Плейсхолдер. Если захочешь — позже добавим падения билетов/беретов.
   }
 
   // ==== Чекер ====
-  let whitelist = [];
+  // Используем Set для быстрых проверок и избавления от дублей
+  let whitelistSet = new Set();
+  let whitelistLoaded = false;
+
+  // Универсальная нормализация форматов, которые может вернуть Apps Script / Sheets
+  function normalizeToFlatArray(raw) {
+    // Если пришла строка — попробуем распарсить или разбить по разделителям
+    if (typeof raw === "string") {
+      try {
+        const parsed = JSON.parse(raw);
+        return normalizeToFlatArray(parsed);
+      } catch {
+        return raw.split(/\r?\n|,|;|\t/).map(s => s.trim()).filter(Boolean);
+      }
+    }
+
+    // Если это массив
+    if (Array.isArray(raw)) {
+      // 2D-массив -> расплющиваем, иначе возвращаем как есть
+      return Array.isArray(raw[0]) ? raw.flat() : raw;
+    }
+
+    // Если это объект — ищем вероятные ключи
+    if (raw && typeof raw === "object") {
+      const candidates = ["whitelist", "values", "data", "addresses", "items"];
+      for (const key of candidates) {
+        if (Array.isArray(raw[key])) {
+          return Array.isArray(raw[key][0]) ? raw[key].flat() : raw[key];
+        }
+      }
+    }
+
+    return [];
+  }
+
+  // Опциональная проверка на «похоже на Solana-адрес»
+  function isProbablySolana(addr) {
+    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
+  }
 
   async function loadWhitelist() {
+    const btn = document.getElementById("checkBtn");
     try {
+      btn.disabled = true;
+
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDdWAobD6b4h7NUQE8ytZhzcRjRb2Ub1FJXbbHPRWDVFBnx2xSAJH_PRmRQgEx9PoS/exec";
       const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
-      whitelist = await res.json();
-      console.log("Whitelist loaded:", whitelist);
+
+      // Если вернётся не JSON — это бросит исключение, обработаем ниже
+      const raw = await res.json();
+
+      // Нормализуем в плоский массив
+      const flat = normalizeToFlatArray(raw);
+
+      // Чистим: к строке, trim, в нижний регистр, фильтруем пустые/мусор
+      const cleaned = flat
+        .map(v => String(v).trim())
+        .filter(Boolean)
+        .map(v => v.toLowerCase());
+
+      // Если нужны именно Solana-адреса — раскомментируй следующую строку:
+      // const filtered = cleaned.filter(isProbablySolana);
+      const filtered = cleaned;
+
+      // Дедупликация
+      whitelistSet = new Set(filtered);
+      whitelistLoaded = true;
+
+      console.log(`Whitelist loaded: ${whitelistSet.size} addresses`);
     } catch (err) {
       console.error("Whitelist load error:", err);
-      whitelist = [];
+      whitelistSet = new Set();
+      whitelistLoaded = false;
+    } finally {
+      btn.disabled = false;
     }
   }
 
   function checkWallet() {
     const inputEl = document.getElementById("walletInput");
     const resultEl = document.getElementById("result");
-    const input = inputEl.value.trim().toLowerCase();
+    const raw = inputEl.value;
+    const input = raw.trim().toLowerCase();
     inputEl.value = "";
 
     if (!input) {
@@ -204,7 +269,13 @@
       return;
     }
 
-    if (whitelist.includes(input)) {
+    if (!whitelistLoaded) {
+      resultEl.innerText = "Список ещё загружается. Попробуйте через секунду.";
+      resultEl.style.color = "#ffdd88";
+      return;
+    }
+
+    if (whitelistSet.has(input)) {
       resultEl.innerText = "✅ Адрес найден в whitelist!";
       resultEl.style.color = "#00ff88";
     } else {
@@ -216,11 +287,17 @@
   document.addEventListener("DOMContentLoaded", () => {
     startFX();
     loadWhitelist();
+
+    // Поддержка Enter
+    document.getElementById("walletInput").addEventListener("keydown", (e) => {
+      if (e.key === "Enter") checkWallet();
+    });
   });
 </script>
   
 </body>
 </html>
+
 
 
 
