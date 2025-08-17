@@ -101,24 +101,9 @@
     }
     .monsters img,
     .monsters-shadow img {
-      height: 70vh; /* одинаковый рост */
+      height: 70vh;
       width: auto;
       object-fit: contain;
-    }
-    /* поправка для пчелы */
-    .monsters div:nth-child(1) img,
-    .monsters-shadow div:nth-child(1) img {
-      transform: translateY(5vh);
-    }
-    /* центр без смещения */
-    .monsters div:nth-child(2) img,
-    .monsters-shadow div:nth-child(2) img {
-      transform: translateY(0);
-    }
-    /* фиолетовый чуть ниже */
-    .monsters div:nth-child(3) img,
-    .monsters-shadow div:nth-child(3) img {
-      transform: translateY(3vh);
     }
     .monsters img { animation: monsterPeek 6s ease-in-out infinite; }
     @keyframes monsterPeek {
@@ -126,7 +111,7 @@
       50% { transform: translateY(0) rotate(2deg); }
     }
 
-    /* ===== Эффекты (Tickets, Berets, Bubbles) ===== */
+    /* ===== Эффекты ===== */
     .fx-container {
       position: fixed;
       top: 0; left: 0;
@@ -135,23 +120,18 @@
       pointer-events: none;
       z-index: 3;
     }
+    .ticket, .beret {
+      position: absolute;
+      pointer-events: none;
+    }
     .ticket img, .beret img {
-      width: 80px;
-      opacity: 0.9;
+      opacity: 0.95;
+      display: block;
     }
-    .bubble {
-      width: 20px; height: 20px;
-      border-radius: 50%;
-      background: rgba(255,255,255,0.5);
-      box-shadow: 0 0 10px rgba(255,255,255,0.7);
-    }
+
     @keyframes fall {
-      0% { transform: translateY(-10%); opacity: 1; }
-      100% { transform: translateY(110vh); opacity: 0; }
-    }
-    @keyframes rise {
-      0% { transform: translateY(110vh) scale(0.5); opacity: 0.8; }
-      100% { transform: translateY(-10vh) scale(1.2); opacity: 0; }
+      0% { transform: translateY(-10%) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(360deg); opacity: 0; }
     }
   </style>
 </head>
@@ -257,43 +237,24 @@
     function startFX() {
       const fx = document.getElementById("fx");
 
-      function spawnTicket() {
+      function spawnFallingImage(src, className) {
         const el = document.createElement("div");
-        el.className = "ticket";
+        el.className = className;
         el.style.left = Math.random() * 100 + "vw";
         el.style.top = "-10%";
-        el.style.transform = `rotate(${Math.random() * 60 - 30}deg)`;
-        el.style.animation = `fall ${6 + Math.random() * 4}s linear forwards`;
-        el.innerHTML = `<img src="ticket.png" alt="ticket">`;
+
+        // случайный размер и поворот
+        const size = 40 + Math.random() * 80; // 40px – 120px
+        const rotate = Math.random() * 360;
+
+        el.style.animation = `fall ${2 + Math.random() * 3}s linear forwards`;
+        el.innerHTML = `<img src="${src}" style="width:${size}px; transform: rotate(${rotate}deg);">`;
         fx.appendChild(el);
-        setTimeout(() => el.remove(), 10000);
+        setTimeout(() => el.remove(), 5000);
       }
 
-      function spawnBeret() {
-        const el = document.createElement("div");
-        el.className = "beret";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.top = "-10%";
-        el.style.transform = `rotate(${Math.random() * 360}deg)`;
-        el.style.animation = `fall ${5 + Math.random() * 5}s linear forwards`;
-        el.innerHTML = `<img src="beret.png" alt="beret">`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), 10000);
-      }
-
-      function spawnBubble() {
-        const el = document.createElement("div");
-        el.className = "bubble";
-        el.style.left = Math.random() * 100 + "vw";
-        el.style.bottom = "-5%";
-        el.style.animation = `rise ${6 + Math.random() * 4}s ease-in forwards`;
-        fx.appendChild(el);
-        setTimeout(() => el.remove(), 10000);
-      }
-
-      setInterval(spawnTicket, 2500);
-      setInterval(spawnBeret, 4000);
-      setInterval(spawnBubble, 1200);
+      setInterval(() => spawnFallingImage("haha20.png", "ticket"), 400); // быстро падают
+      setInterval(() => spawnFallingImage("bar_out_18.png", "beret"), 600);
     }
   </script>
 </body>
