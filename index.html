@@ -13,31 +13,29 @@
       color: #fff;
     }
 
-    /* контейнер */
     .checker-container {
       display: flex;
       flex-direction: column;
       align-items: center;
       margin-top: 30px;
+      width: 100%;
+      max-width: 500px;
+      margin-left: auto;
+      margin-right: auto;
     }
 
-    /* картинка сверху */
+    /* картинка сверху, ширина адаптивная */
     .checker-image {
-      display: block;
-      max-width: 460px; /* ширина совпадает с чекером */
       width: 100%;
+      height: auto;
       border-radius: 10px;
       margin-bottom: 15px;
     }
 
-    /* чекер */
     .checker-wrapper {
       display: flex;
-      justify-content: center;
-      align-items: center;
       gap: 10px;
       width: 100%;
-      max-width: 460px;
     }
 
     #walletInput {
@@ -57,9 +55,10 @@
     }
 
     .beret-btn {
-      width: 140px;
+      width: 100px;
       transition: transform 0.2s ease;
     }
+
     .beret-btn:hover {
       transform: scale(1.05) rotate(-2deg);
     }
