@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Jumapel Nads | Checker</title>
+  <title>Whitelist Checker</title>
   <style>
     html, body {
       margin: 0;
@@ -11,27 +11,37 @@
       font-family: 'Segoe UI', sans-serif;
       background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
       color: #fff;
-      overflow: hidden;
     }
 
-    h1 {
-      text-align: center;
-      font-size: 48px;
-      margin: 10px 0;
-      color: red; /* красная надпись */
+    /* контейнер */
+    .checker-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-top: 30px;
     }
 
-    /* checker */
+    /* картинка сверху */
+    .checker-image {
+      display: block;
+      max-width: 460px; /* ширина совпадает с чекером */
+      width: 100%;
+      border-radius: 10px;
+      margin-bottom: 15px;
+    }
+
+    /* чекер */
     .checker-wrapper {
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 10px;
-      margin-bottom: 10px;
+      width: 100%;
+      max-width: 460px;
     }
 
     #walletInput {
-      width: 300px;
+      flex: 1;
       padding: 12px 15px;
       font-size: 16px;
       border-radius: 10px;
@@ -56,187 +66,28 @@
 
     #result {
       text-align: center;
-      margin-top: 10px;
+      margin-top: 15px;
       font-size: 18px;
       font-weight: bold;
-    }
-
-    /* flying tickets */
-    .ticket {
-      position: absolute;
-      bottom: -100px;
-      left: 50%;
-      transform: translateX(-50%);
-      z-index: 2;
-    }
-    .ticket img {
-      width: 120px;
-      animation: flyUp 6s linear infinite;
-    }
-    @keyframes flyUp {
-      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-110vh) translateX(100px) rotate(360deg); opacity: 0; }
-    }
-
-    /* flying berets */
-    .beret-fly {
-      position: absolute;
-      bottom: -100px;
-      z-index: 1;
-    }
-    .beret-fly img {
-      width: 100px;
-      animation: flyBeret 8s linear infinite;
-    }
-    @keyframes flyBeret {
-      0% { transform: translateY(0) translateX(0) rotate(0deg); opacity: 1; }
-      100% { transform: translateY(-120vh) translateX(-150px) rotate(-720deg); opacity: 0; }
-    }
-
-    /* bubbles */
-    .bubble {
-      position: absolute;
-      bottom: -100px;
-      width: 40px;
-      height: 40px;
-      background: rgba(255,255,255,0.2);
-      border-radius: 50%;
-      animation: bubbleFloat 12s linear infinite;
-    }
-    @keyframes bubbleFloat {
-      0% { transform: translateY(0) scale(1); opacity: 0.5; }
-      50% { opacity: 1; }
-      100% { transform: translateY(-110vh) scale(1.5); opacity: 0; }
-    }
-
-    /* shadow monsters */
-    .shadow-monsters {
-      position: fixed;
-      bottom: -12%;
-      width: 100%;
-      height: 65vh;
-      pointer-events: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      z-index: 0; /* под всем */
-      opacity: 0.4;
-    }
-    .shadow img {
-      height: 100%;
-      filter: grayscale(1) brightness(0.3) blur(2px);
-      opacity: 0.7;
-    }
-    .shadow.center img {
-      animation: shadowFloat 10s ease-in-out infinite;
-    }
-    @keyframes shadowFloat {
-      0%, 100% { transform: translateY(5%); }
-      50% { transform: translateY(-5%); }
-    }
-
-    /* main monsters */
-    .bottom-monsters {
-      position: fixed;
-      bottom: -15%;
-      width: 100%;
-      height: 60vh;
-      pointer-events: none;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      z-index: 1;
-    }
-    .monster {
-      position: relative;
-      height: 100%;
-    }
-    .monster img {
-      height: 100%;
-      transform-origin: bottom center;
-      animation: monsterPeek 5s ease-in-out infinite;
-    }
-    .monster.center {
-      position: absolute;
-      left: 50%;
-      transform: translateX(-50%);
-      height: 100%;
-    }
-    .monster.center img {
-      animation: monsterPeekCenter 5s ease-in-out infinite;
-    }
-    @keyframes monsterPeek {
-      0%, 100% { transform: translateY(15%) rotate(0deg); }
-      50% { transform: translateY(0) rotate(3deg); }
-    }
-    @keyframes monsterPeekCenter {
-      0%, 100% { transform: translateY(20%) scale(1); }
-      50% { transform: translateY(0) scale(1.05); }
     }
   </style>
 </head>
 <body>
 
-  <h1>Jumapel Nads</h1>
+  <div class="checker-container">
+    <img src="game9.png" alt="Game 9" class="checker-image">
 
-  <!-- checker -->
-  <div class="checker-wrapper">
-    <input type="text" id="walletInput" placeholder="Enter wallet address">
-    <button id="checkBtn" onclick="checkWallet()">
-      <img src="bar_out_18.png" alt="Beret" class="beret-btn">
-    </button>
-  </div>
-  <div id="result">⌛ Loading whitelist...</div>
-
-  <!-- flying tickets -->
-  <div class="ticket" style="left:30%; animation-delay:1s;">
-    <img src="haha_20.png" alt="Ticket">
-  </div>
-  <div class="ticket" style="left:70%; animation-delay:3s;">
-    <img src="haha_20.png" alt="Ticket">
-  </div>
-
-  <!-- flying berets -->
-  <div class="beret-fly" style="left:20%; animation-delay:2s;">
-    <img src="bar_out_18.png" alt="Flying Beret">
-  </div>
-  <div class="beret-fly" style="left:60%; animation-delay:5s;">
-    <img src="bar_out_18.png" alt="Flying Beret">
-  </div>
-
-  <!-- bubbles -->
-  <div class="bubble" style="left:10%; animation-duration:15s;"></div>
-  <div class="bubble" style="left:50%; animation-duration:12s;"></div>
-  <div class="bubble" style="left:80%; animation-duration:18s;"></div>
-
-  <!-- shadow monsters -->
-  <div class="shadow-monsters">
-    <div class="shadow left">
-      <img src="game7.png" alt="Shadow monster left">
+    <div class="checker-wrapper">
+      <input type="text" id="walletInput" placeholder="Enter wallet address">
+      <button id="checkBtn" onclick="checkWallet()">
+        <img src="bar_out_18.png" alt="Beret" class="beret-btn">
+      </button>
     </div>
-    <div class="shadow center">
-      <img src="game6.png" alt="Shadow monster center">
-    </div>
-    <div class="shadow right">
-      <img src="game8.png" alt="Shadow monster right">
-    </div>
-  </div>
-
-  <!-- main monsters -->
-  <div class="bottom-monsters">
-    <div class="monster left">
-      <img src="game7.png" alt="Monster left">
-    </div>
-    <div class="monster center">
-      <img src="game6.png" alt="Monster center">
-    </div>
-    <div class="monster right">
-      <img src="game8.png" alt="Monster right">
-    </div>
+    <div id="result">⌛ Loading whitelist...</div>
   </div>
 
 <script>
-const SHEET_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vR7fSRfFR8_HLtisRRchcKyifgwyI3VxuOd727mczJRSsyMQH2M0wKowB9luUWP8Q-oJsMv34_7o1Gi/pub?output=csv";
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwqxVIzM2713jT7_MJ0ugKfvUiq6kCHH3cQLOjn4KZM3LFC0axzWEuL_o0F94YMITA2/exec";
 let whitelist = [];
 
 const checkBtn = document.getElementById("checkBtn");
@@ -244,24 +95,13 @@ checkBtn.disabled = true;
 
 async function loadWhitelist() {
   try {
-    // Сначала пробуем через allorigins.org
-    let res = await fetch("https://api.allorigins.org/raw?url=" + encodeURIComponent(SHEET_URL));
-    
-    // Если сервер не ответил, пробуем напрямую
-    if (!res.ok) {
-      res = await fetch(SHEET_URL);
-    }
+    const res = await fetch(SCRIPT_URL);
+    whitelist = await res.json();
+    whitelist = whitelist.map(addr => addr.trim().toLowerCase());
 
-    const csvText = await res.text();
-    whitelist = csvText.split("\n")
-      .map(line => line.split(",")[0])
-      .map(addr => addr.trim().replace(/['"]/g, "").toLowerCase())
-      .filter(addr => addr.length > 0);
-
-    checkBtn.disabled = false;
     document.getElementById("result").innerText = "✅ Whitelist loaded!";
     document.getElementById("result").style.color = "#0f0";
-
+    checkBtn.disabled = false;
   } catch (err) {
     document.getElementById("result").innerText = "Whitelist load error 😢";
     document.getElementById("result").style.color = "#f55";
