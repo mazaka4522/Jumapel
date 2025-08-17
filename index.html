@@ -8,7 +8,7 @@
       margin: 0;
       padding: 0;
       overflow: hidden;
-      background: #111; /* твой фон (если у тебя картинка, замени на url("...")) */
+      background: #111;
     }
 
     /* Контейнер для эффектов */
@@ -18,10 +18,10 @@
       width: 100%; height: 100%;
       overflow: hidden;
       pointer-events: none;
-      z-index: 10; /* выше монстров, чекера и фона */
+      z-index: 10; /* выше монстров */
     }
 
-    .ticket, .beret {
+    .ticket, .beret, .bubble {
       position: absolute;
       display: block;
       pointer-events: none;
@@ -39,21 +39,24 @@
       from { transform: translate(0, -10vh) rotate(0deg); }
       to   { transform: translate(var(--drift, 0px), 110vh) rotate(360deg); }
     }
+
+    @keyframes rise {
+      from { transform: translate(0, 110vh) scale(0.5); opacity: 0.8; }
+      50%  { transform: translate(calc(var(--drift, 0px) * 0.5), 50vh) scale(1); }
+      to   { transform: translate(var(--drift, 0px), -20vh) scale(1.2); opacity: 0; }
+    }
+
+    .bubble {
+      border-radius: 50%;
+      background: rgba(255,255,255,0.3);
+      backdrop-filter: blur(3px);
+    }
   </style>
 </head>
 <body>
-  <!-- здесь у тебя остаётся твой фон, чекер, тени и монстры -->
-  <!-- пример: -->
-  <div class="background">
-    <img src="your_background.png" alt="фон">
-  </div>
+  <!-- ⚡️ здесь остаются твои монстры, фон, чекер и тени как в первом коде -->
 
-  <div class="monsters">
-    <img src="photo9.png" alt="monster" style="position:absolute; top:20%; left:15%;">
-    <img src="checker.png" alt="checker" style="position:absolute; bottom:10%; right:10%;">
-  </div>
-
-  <!-- Контейнер для падающих эффектов -->
+  <!-- Контейнер для спецэффектов -->
   <div class="fx-container" id="fx"></div>
 
   <script>
@@ -83,15 +86,31 @@
       setTimeout(() => el.remove(), 5000);
     }
 
+    function spawnBubble() {
+      const el = document.createElement("div");
+      el.className = "bubble";
+      const size = 20 + Math.random() * 40;
+      el.style.width = size + "px";
+      el.style.height = size + "px";
+      el.style.left = Math.random() * 100 + "vw";
+      el.style.top = "110%";
+      el.style.setProperty("--drift", (Math.random() * 100 - 50) + "px");
+      el.style.animation = `rise ${4 + Math.random() * 3}s ease-out forwards`;
+      fx.appendChild(el);
+      setTimeout(() => el.remove(), 7000);
+    }
+
     // хаотичный поток
     function randomSpawn() {
       const r = Math.random();
-      if (r < 0.5) {
+      if (r < 0.4) {
         spawnTicket();
-      } else {
+      } else if (r < 0.8) {
         spawnBeret();
+      } else {
+        spawnBubble();
       }
-      setTimeout(randomSpawn, 400 + Math.random() * 600);
+      setTimeout(randomSpawn, 300 + Math.random() * 700);
     }
 
     randomSpawn();
