@@ -33,6 +33,7 @@
       opacity: 0.9;
     }
 
+    /* Падение + вращение */
     @keyframes fallAndSpin {
       0%   { transform: translateY(-10%) rotate(0deg) scale(1); opacity: 1; }
       50%  { transform: translateY(50vh) rotate(180deg) scale(1.1); opacity: 0.9; }
@@ -48,6 +49,7 @@
     function startFX() {
       const fx = document.getElementById("fx");
 
+      // ==== Билет (haha_20.png) ====
       function spawnTicket() {
         const el = document.createElement("div");
         el.className = "ticket";
@@ -62,6 +64,7 @@
         setTimeout(() => el.remove(), duration * 1000 + 500);
       }
 
+      // ==== Берет (bar_out_18.png) ====
       function spawnBeret() {
         const el = document.createElement("div");
         el.className = "beret";
@@ -77,8 +80,8 @@
       }
 
       // Спавн: часто и хаотично
-      setInterval(spawnTicket, 600);
-      setInterval(spawnBeret, 900);
+      setInterval(spawnTicket, 600); // билеты чаще
+      setInterval(spawnBeret, 900);  // береты чуть реже
     }
 
     document.addEventListener("DOMContentLoaded", startFX);
