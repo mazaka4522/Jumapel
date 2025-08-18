@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <title>Jumapel Nads | Checker</title>
@@ -15,14 +15,14 @@
       overflow: hidden;
     }
 
-    /* ===== Слои ===== */
+    /* ===== Layers ===== */
     .layer-fx { z-index: 10; pointer-events: none; }
     .layer-monsters-shadow { z-index: 0; pointer-events: none; }
     .layer-monsters { z-index: 1; pointer-events: none; }
     .layer-checker { z-index: 5; }
     .layer-topimg { z-index: 6; }
 
-    /* ===== Контейнер ===== */
+    /* ===== Container ===== */
     .stack {
       position: relative;
       width: 90vw;
@@ -30,14 +30,14 @@
       margin: 20px auto 0 auto;
     }
 
-    /* ===== Верхняя картинка ===== */
+    /* ===== Top image ===== */
     .top-image img {
       width: 100%;
       height: auto;
       display: block;
     }
 
-    /* ===== Чекер ===== */
+    /* ===== Checker ===== */
     .checker {
       position: relative;
       width: 100%;
@@ -83,7 +83,7 @@
       min-height: 22px;
     }
 
-    /* ===== Монстры ===== */
+    /* ===== Monsters ===== */
     .monsters-shadow, .monsters {
       position: fixed;
       bottom: -15vh;
@@ -111,7 +111,7 @@
       50% { transform: translateY(0) rotate(2deg); }
     }
 
-    /* ===== Эффекты падения ===== */
+    /* ===== Falling FX ===== */
     .fx-container {
       position: fixed;
       top: 0; left: 0;
@@ -136,12 +136,12 @@
   </style>
 </head>
 <body>
-  <!-- Верхняя картинка -->
+  <!-- Top image -->
   <div class="stack layer-topimg">
     <div class="top-image"><img src="foto9.png" alt="Foto9"></div>
   </div>
 
-  <!-- Чекер -->
+  <!-- Checker -->
   <div class="stack layer-checker">
     <div class="checker">
       <div class="row">
@@ -150,41 +150,38 @@
           <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
         </button>
       </div>
-      <div id="result"></div>
+      <div id="result">Loading whitelist...</div>
     </div>
   </div>
 
-  <!-- Тени монстров -->
+  <!-- Monsters shadows -->
   <div class="monsters-shadow layer-monsters-shadow">
     <div><img src="game7.png" alt="Shadow Left"></div>
     <div><img src="game6.png" alt="Shadow Center"></div>
     <div><img src="game8.png" alt="Shadow Right"></div>
   </div>
 
-  <!-- Монстры -->
+  <!-- Monsters -->
   <div class="monsters layer-monsters">
     <div><img src="game7.png" alt="Monster Left"></div>
     <div><img src="game6.png" alt="Monster Center"></div>
     <div><img src="game8.png" alt="Monster Right"></div>
   </div>
 
-  <!-- Эффекты -->
+  <!-- FX -->
   <div class="fx-container layer-fx" id="fx"></div>
 
 <script>
-  // ==== Эффекты (оставляем визуал как есть, без падений, чтобы не ломать скрипт) ====
+  // ==== FX placeholder ====
   function startFX() {
-    // Плейсхолдер. Если захочешь — позже добавим падения билетов/беретов.
+    // You can add falling tickets/berets here if needed
   }
 
-  // ==== Чекер ====
-  // Используем Set для быстрых проверок и избавления от дублей
+  // ==== Checker ====
   let whitelistSet = new Set();
   let whitelistLoaded = false;
 
-  // Универсальная нормализация форматов, которые может вернуть Apps Script / Sheets
   function normalizeToFlatArray(raw) {
-    // Если пришла строка — попробуем распарсить или разбить по разделителям
     if (typeof raw === "string") {
       try {
         const parsed = JSON.parse(raw);
@@ -193,14 +190,9 @@
         return raw.split(/\r?\n|,|;|\t/).map(s => s.trim()).filter(Boolean);
       }
     }
-
-    // Если это массив
     if (Array.isArray(raw)) {
-      // 2D-массив -> расплющиваем, иначе возвращаем как есть
       return Array.isArray(raw[0]) ? raw.flat() : raw;
     }
-
-    // Если это объект — ищем вероятные ключи
     if (raw && typeof raw === "object") {
       const candidates = ["whitelist", "values", "data", "addresses", "items"];
       for (const key of candidates) {
@@ -209,48 +201,40 @@
         }
       }
     }
-
     return [];
-  }
-
-  // Опциональная проверка на «похоже на Solana-адрес»
-  function isProbablySolana(addr) {
-    return /^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(addr);
   }
 
   async function loadWhitelist() {
     const btn = document.getElementById("checkBtn");
+    const resultEl = document.getElementById("result");
     try {
       btn.disabled = true;
+      resultEl.innerText = "Loading whitelist...";
+      resultEl.style.color = "#ffdd88";
 
       const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDdWAobD6b4h7NUQE8ytZhzcRjRb2Ub1FJXbbHPRWDVFBnx2xSAJH_PRmRQgEx9PoS/exec";
       const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
-
-      // Если вернётся не JSON — это бросит исключение, обработаем ниже
       const raw = await res.json();
 
-      // Нормализуем в плоский массив
       const flat = normalizeToFlatArray(raw);
-
-      // Чистим: к строке, trim, в нижний регистр, фильтруем пустые/мусор
       const cleaned = flat
         .map(v => String(v).trim())
         .filter(Boolean)
         .map(v => v.toLowerCase());
 
-      // Если нужны именно Solana-адреса — раскомментируй следующую строку:
-      // const filtered = cleaned.filter(isProbablySolana);
-      const filtered = cleaned;
-
-      // Дедупликация
-      whitelistSet = new Set(filtered);
+      whitelistSet = new Set(cleaned);
       whitelistLoaded = true;
+
+      resultEl.innerText = "Whitelist loaded!";
+      resultEl.style.color = "#00ff88";
 
       console.log(`Whitelist loaded: ${whitelistSet.size} addresses`);
     } catch (err) {
       console.error("Whitelist load error:", err);
       whitelistSet = new Set();
       whitelistLoaded = false;
+      resultEl.innerText = "Error loading whitelist.";
+      resultEl.style.color = "#ff6688";
     } finally {
       btn.disabled = false;
     }
@@ -264,22 +248,22 @@
     inputEl.value = "";
 
     if (!input) {
-      resultEl.innerText = "Введите адрес!";
+      resultEl.innerText = "Please enter an address!";
       resultEl.style.color = "#ffaaaa";
       return;
     }
 
     if (!whitelistLoaded) {
-      resultEl.innerText = "Список ещё загружается. Попробуйте через секунду.";
+      resultEl.innerText = "Whitelist is still loading. Try again shortly.";
       resultEl.style.color = "#ffdd88";
       return;
     }
 
     if (whitelistSet.has(input)) {
-      resultEl.innerText = "✅ Адрес найден в whitelist!";
+      resultEl.innerText = "✅ Address is whitelisted!";
       resultEl.style.color = "#00ff88";
     } else {
-      resultEl.innerText = "❌ Адрес не найден.";
+      resultEl.innerText = "❌ Address not found in whitelist.";
       resultEl.style.color = "#ff6688";
     }
   }
@@ -287,8 +271,6 @@
   document.addEventListener("DOMContentLoaded", () => {
     startFX();
     loadWhitelist();
-
-    // Поддержка Enter
     document.getElementById("walletInput").addEventListener("keydown", (e) => {
       if (e.key === "Enter") checkWallet();
     });
@@ -297,8 +279,3 @@
   
 </body>
 </html>
-
-
-
-
-
