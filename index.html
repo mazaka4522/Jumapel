@@ -1,281 +1,384 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
-  <meta charset="UTF-8" />
-  <title>Jumapel Nads | Checker</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mikey Workshop</title>
   <style>
     html, body {
       margin: 0;
-      padding: 0;
       height: 100%;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+      display: flex;
+      flex-direction: column;
+      background: linear-gradient(-45deg, #1a0025, #3b003f, #d09aff, #5ac8fa);
+      background-size: 400% 400%;
+      animation: gradientBG 15s ease infinite;
       color: #fff;
       overflow: hidden;
     }
 
-    /* ===== Layers ===== */
-    .layer-fx { z-index: 10; pointer-events: none; }
-    .layer-monsters-shadow { z-index: 0; pointer-events: none; }
-    .layer-monsters { z-index: 1; pointer-events: none; }
-    .layer-checker { z-index: 5; }
-    .layer-topimg { z-index: 6; }
-
-    /* ===== Container ===== */
-    .stack {
-      position: relative;
-      width: 90vw;
-      max-width: 450px;
-      margin: 20px auto 0 auto;
+    @keyframes gradientBG {
+      0% {background-position:0% 50%;}
+      50% {background-position:100% 50%;}
+      100% {background-position:0% 50%;}
     }
 
-    /* ===== Top image ===== */
-    .top-image img {
-      width: 100%;
-      height: auto;
-      display: block;
-    }
-
-    /* ===== Checker ===== */
-    .checker {
-      position: relative;
-      width: 100%;
-      margin: 0 auto 10px auto;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+    header {
       text-align: center;
+      margin: 0;
+      z-index: 10;
+      position: relative;
     }
-    .checker .row {
-      width: 100%;
+    #artistTitle {
+      font-family: 'Wedges', sans-serif;
+      font-size: clamp(36px, 6vw, 90px);
+      color: #d09aff;
+      text-shadow: 0 0 10px #d09aff, 0 0 20px #e6bfff, 0 0 40px #f2d9ff;
+      margin: 0;
+      padding: 15px 0;
+      transition: text-shadow 0.3s;
+    }
+    #artistTitle:hover {
+      text-shadow: 0 0 15px #d09aff, 0 0 25px #e6bfff, 0 0 50px #f2d9ff;
+    }
+
+    .workshop-section {
+      flex: 1;
       display: flex;
       justify-content: center;
       align-items: center;
-      gap: 10px;
-    }
-    #walletInput {
-      flex: 1;
-      padding: 12px 15px;
-      font-size: 16px;
-      border-radius: 10px;
-      border: none;
-      outline: none;
-    }
-    #checkBtn {
-      background: none;
-      border: none;
-      cursor: pointer;
-      padding: 0;
-    }
-    #checkBtn:disabled { opacity: 0.5; pointer-events: none; }
-    .beret-btn {
-      width: 140px;
-      transition: transform 0.2s ease;
-      display: block;
-    }
-    .beret-btn:hover { transform: scale(1.05) rotate(-2deg); }
-    #result {
-      text-align: center;
-      margin-top: 10px;
-      font-size: 18px;
-      font-weight: bold;
-      min-height: 22px;
-    }
-
-    /* ===== Monsters ===== */
-    .monsters-shadow, .monsters {
-      position: fixed;
-      bottom: -15vh;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      pointer-events: none;
-      padding: 0 3vw;
-    }
-    .monsters-shadow {
-      opacity: 0.4;
-      filter: grayscale(1) brightness(0.3) blur(2px);
-    }
-    .monsters img,
-    .monsters-shadow img {
-      height: 70vh;
-      width: auto;
-      object-fit: contain;
-    }
-    .monsters img { animation: monsterPeek 6s ease-in-out infinite; }
-    @keyframes monsterPeek {
-      0%, 100% { transform: translateY(10%) rotate(0deg); }
-      50% { transform: translateY(0) rotate(2deg); }
-    }
-
-    /* ===== Falling FX ===== */
-    .fx-container {
-      position: fixed;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      pointer-events: none;
+      gap: 30px;
+      padding: 20px;
       z-index: 10;
+      position: relative;
     }
-    .ticket, .beret {
+
+    /* Левая колонка */
+    .workshop-left {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 350px;
+    }
+    .pfp {
+      width: 100%;
+      height: 400px;
+      object-fit: contain;
+      border-radius: 16px;
+      cursor: pointer;
+      transition: transform 0.3s;
+      z-index: 10;
+      position: relative;
+    }
+    .pfp:hover {
+      transform: scale(1.02);
+      filter: drop-shadow(0 0 8px #d09aff);
+    }
+    .socials {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-top: 10px;
+    }
+    .socials img {
+      width: 50px;
+      cursor: pointer;
+      transition: transform 0.3s, filter 0.3s;
+    }
+    .socials img:hover {
+      transform: scale(1.1);
+      filter: drop-shadow(0 0 8px #d09aff);
+    }
+
+    /* Крутящийся тикет */
+    .ticket-spin {
+      animation: spin 4s linear infinite;
+    }
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
+    }
+
+    /* Центр (MIKEY) */
+    #mikeyName {
+      font-family: 'Wedges', sans-serif;
+      font-size: clamp(32px, 5vw, 80px);
+      color: #d09aff;
+      text-shadow: 0 0 10px #d09aff, 0 0 20px #e6bfff, 0 0 40px #f2d9ff;
+      writing-mode: vertical-rl;
+      transform: rotate(180deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 400px;
+    }
+
+    /* Правая колонка */
+    .workshop-right {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 350px;
+      max-width: 350px;
+    }
+    .slider {
+      width: 100%;
+      height: 400px;
+      overflow: hidden;
+      border-radius: 16px;
+      background: rgba(26, 0, 37, 0.8);
+    }
+    .slides {
+      display: flex;
+      transition: transform 0.5s ease;
+      height: 100%;
+    }
+    .slide {
+      flex: 0 0 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .slide img {
+      max-width: 100%;
+      max-height: 100%;
+      object-fit: contain;
+      border-radius: 16px;
+      transition: transform 0.5s ease, filter 0.5s ease;
+    }
+    .slide img:hover {
+      transform: scale(1.05);
+      filter: drop-shadow(0 0 15px #d09aff);
+    }
+
+    .monad-link {
+      font-family: 'Wedges', sans-serif;
+      color: #d09aff;
+      text-shadow: 0 0 10px #d09aff, 0 0 20px #e6bfff, 0 0 40px #f2d9ff;
+      margin-top: 10px;
+      transition: text-shadow 0.3s;
+    }
+    .monad-link a {
+      color: inherit;
+      text-decoration: none;
+    }
+    .monad-link a:hover {
+      text-shadow: 0 0 15px #d09aff, 0 0 25px #e6bfff, 0 0 50px #f2d9ff;
+    }
+
+    /* --------- Модальное окно --------- */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.7);
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: #1a0025;
+      border-radius: 16px;
+      padding: 20px;
+      display: flex;
+      gap: 20px;
+      max-width: 800px;
+      color: #fff;
+      text-align: left;
+      box-shadow: 0 0 20px #d09aff;
+      position: relative;
+    }
+    .modal-text {
+      flex: 2;
+      font-size: 18px;
+      line-height: 1.5;
+    }
+    .modal-image {
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .modal-image img {
+      max-width: 100%;
+      height: auto;
+      border-radius: 12px;
+    }
+    .close-btn {
       position: absolute;
-      pointer-events: none;
+      top: 10px;
+      right: 15px;
+      font-size: 24px;
+      color: #fff;
+      cursor: pointer;
+      transition: 0.3s;
     }
-    .ticket img, .beret img {
+    .close-btn:hover {
+      color: #d09aff;
+    }
+
+    /* Летающие монстры */
+    .sprite {
+      position: absolute;
       width: 80px;
-      opacity: 0.9;
+      height: 80px;
+      object-fit: contain;
+      pointer-events: none;
+      opacity: 1;
+      z-index: 1;
+      animation: fly 8s linear forwards;
     }
-    @keyframes fallAndSpin {
-      0%   { transform: translateY(-10%) rotate(0deg) scale(1); opacity: 1; }
-      50%  { transform: translateY(50vh) rotate(180deg) scale(1.1); opacity: 0.9; }
-      100% { transform: translateY(110vh) rotate(360deg) scale(0.9); opacity: 0; }
+
+    /* Кляксы */
+    .splat {
+      position: absolute;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      pointer-events: none;
+      opacity: 0.8;
+      transform: scale(0.5);
+      animation: splatFade 1.5s ease-out forwards;
+      z-index: 0;
+    }
+
+    @keyframes fly {
+      from { transform: translate3d(var(--xStart), var(--yStart), 0) rotate(0deg); }
+      to   { transform: translate3d(var(--xEnd), var(--yEnd), 0) rotate(360deg); }
+    }
+
+    @keyframes splatFade {
+      0%   { opacity: 0.9; transform: scale(0.5); }
+      50%  { opacity: 0.6; transform: scale(1.2); }
+      100% { opacity: 0; transform: scale(2); }
+    }
+
+    /* Адаптивность */
+    @media (max-width: 800px) {
+      .workshop-section {
+        flex-direction: column;
+        gap: 20px;
+      }
+      .workshop-left, .workshop-right {
+        width: 90%;
+        max-width: none;
+      }
+      #mikeyName {
+        writing-mode: horizontal-tb;
+        transform: rotate(0deg);
+        height: auto;
+      }
     }
   </style>
 </head>
 <body>
-  <!-- Top image -->
-  <div class="stack layer-topimg">
-    <div class="top-image"><img src="foto9.png" alt="Foto9"></div>
-  </div>
+  <header>
+    <h1 id="artistTitle">Jumapel Artist</h1>
+  </header>
 
-  <!-- Checker -->
-  <div class="stack layer-checker">
-    <div class="checker">
-      <div class="row">
-        <input type="text" id="walletInput" placeholder="Enter wallet address" />
-        <button id="checkBtn" onclick="checkWallet()">
-          <img src="bar_out_18.png" alt="Beret Button" class="beret-btn" />
-        </button>
+  <main class="workshop-section">
+    <!-- Левая колонка -->
+    <div class="workshop-left">
+      <img src="pfp_mikey.png" alt="Mikey" class="pfp" id="pfpImage"/>
+      <div class="socials">
+        <a href="https://x.com/Mikey_Muffalo" target="_blank">
+          <img src="twitter.png" alt="Twitter Mikey" />
+        </a>
+        <a href="https://x.com/Jumapelnads" target="_blank">
+          <img src="beret.png" alt="Twitter Jumapel" />
+        </a>
+        <a href="https://mazaka4522.github.io/Jumapel/" target="_blank">
+          <img src="tiket.png" alt="Tiket" class="ticket-spin"/>
+        </a>
       </div>
-      <div id="result">Loading whitelist...</div>
+    </div>
+
+    <!-- Центр -->
+    <div id="mikeyName">MIKEY</div>
+
+    <!-- Правая колонка -->
+    <div class="workshop-right">
+      <div class="slider">
+        <div class="slides">
+          <div class="slide"><img src="1.png" alt=""></div>
+          <div class="slide"><img src="2.png" alt=""></div>
+          <div class="slide"><img src="3.png" alt=""></div>
+          <div class="slide"><img src="4.png" alt=""></div>
+          <div class="slide"><img src="5.png" alt=""></div>
+          <div class="slide"><img src="6.png" alt=""></div>
+          <div class="slide"><img src="7.png" alt=""></div>
+          <div class="slide"><img src="8.png" alt=""></div>
+        </div>
+      </div>
+      <div class="monad-link">
+        <a href="https://twitter.com/monad_xyz" target="_blank">Build on Monad</a>
+      </div>
+    </div>
+  </main>
+
+  <!-- Модальное окно -->
+  <div class="modal" id="artistModal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <div class="modal-text">
+        <h2>Mikey the Artist</h2>
+        <p>
+          Mikey is a professional artist with his own unique style and personal workshop.  
+          He is recognized as one of the best Monartists in Monad and the creator of the NFT collection <b>Jumapel</b>.
+        </p>
+      </div>
+      <div class="modal-image">
+        <img src="game8.png" alt="Game Animation">
+      </div>
     </div>
   </div>
 
-  <!-- Monsters shadows -->
-  <div class="monsters-shadow layer-monsters-shadow">
-    <div><img src="game7.png" alt="Shadow Left"></div>
-    <div><img src="game6.png" alt="Shadow Center"></div>
-    <div><img src="game8.png" alt="Shadow Right"></div>
-  </div>
-
-  <!-- Monsters -->
-  <div class="monsters layer-monsters">
-    <div><img src="game7.png" alt="Monster Left"></div>
-    <div><img src="game6.png" alt="Monster Center"></div>
-    <div><img src="game8.png" alt="Monster Right"></div>
-  </div>
-
-  <!-- FX -->
-  <div class="fx-container layer-fx" id="fx"></div>
-
-<script>
-  // ==== FX placeholder ====
-  function startFX() {
-    // You can add falling tickets/berets here if needed
-  }
-
-  // ==== Checker ====
-  let whitelistSet = new Set();
-  let whitelistLoaded = false;
-
-  function normalizeToFlatArray(raw) {
-    if (typeof raw === "string") {
-      try {
-        const parsed = JSON.parse(raw);
-        return normalizeToFlatArray(parsed);
-      } catch {
-        return raw.split(/\r?\n|,|;|\t/).map(s => s.trim()).filter(Boolean);
-      }
+  <script>
+    // Автопрокрутка слайдов
+    const slides = document.querySelector('.slides');
+    const slideCount = document.querySelectorAll('.slide').length;
+    let currentIndex = 0;
+    function showNextSlide() {
+      currentIndex = (currentIndex + 1) % slideCount;
+      slides.style.transform = `translateX(-${currentIndex * 100}%)`;
     }
-    if (Array.isArray(raw)) {
-      return Array.isArray(raw[0]) ? raw.flat() : raw;
-    }
-    if (raw && typeof raw === "object") {
-      const candidates = ["whitelist", "values", "data", "addresses", "items"];
-      for (const key of candidates) {
-        if (Array.isArray(raw[key])) {
-          return Array.isArray(raw[key][0]) ? raw[key].flat() : raw[key];
-        }
-      }
-    }
-    return [];
-  }
+    setInterval(showNextSlide, 3000);
 
-  async function loadWhitelist() {
-    const btn = document.getElementById("checkBtn");
-    const resultEl = document.getElementById("result");
-    try {
-      btn.disabled = true;
-      resultEl.innerText = "Loading whitelist...";
-      resultEl.style.color = "#ffdd88";
+    // Модальное окно
+    const modal = document.getElementById("artistModal");
+    const pfpImage = document.getElementById("pfpImage");
+    const closeModal = document.getElementById("closeModal");
+    pfpImage.onclick = () => { modal.style.display = "flex"; };
+    closeModal.onclick = () => { modal.style.display = "none"; };
+    window.onclick = (e) => { if (e.target === modal) modal.style.display = "none"; };
 
-      const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzDdWAobD6b4h7NUQE8ytZhzcRjRb2Ub1FJXbbHPRWDVFBnx2xSAJH_PRmRQgEx9PoS/exec";
-      const res = await fetch(SCRIPT_URL + "?t=" + Date.now(), { cache: "no-store" });
-      const raw = await res.json();
+    // Летающие монстры с кляксами
+    const sprites = ["game6.png", "game7.png", "game8.png"];
+    const splatColors = ["#ff3b30", "#ffcc00", "#4cd964", "#5ac8fa", "#d09aff", "#ff2d55"];
+    function createSprite() {
+      const sprite = document.createElement("img");
+      sprite.src = sprites[Math.floor(Math.random() * sprites.length)];
+      sprite.className = "sprite";
 
-      const flat = normalizeToFlatArray(raw);
-      const cleaned = flat
-        .map(v => String(v).trim())
-        .filter(Boolean)
-        .map(v => v.toLowerCase());
+      const startX = Math.random() * window.innerWidth;
+      const startY = Math.random() * window.innerHeight;
+      const endX = Math.random() * window.innerWidth;
+      const endY = Math.random() * window.innerHeight;
 
-      whitelistSet = new Set(cleaned);
-      whitelistLoaded = true;
+      sprite.style.setProperty("--xStart", `${startX}px`);
+      sprite.style.setProperty("--yStart", `${startY}px`);
+      sprite.style.setProperty("--xEnd", `${endX}px`);
+      sprite.style.setProperty("--yEnd", `${endY}px`);
 
-      resultEl.innerText = "Whitelist loaded!";
-      resultEl.style.color = "#00ff88";
+      document.body.appendChild(sprite);
 
-      console.log(`Whitelist loaded: ${whitelistSet.size} addresses`);
-    } catch (err) {
-      console.error("Whitelist load error:", err);
-      whitelistSet = new Set();
-      whitelistLoaded = false;
-      resultEl.innerText = "Error loading whitelist.";
-      resultEl.style.color = "#ff6688";
-    } finally {
-      btn.disabled = false;
-    }
-  }
-
-  function checkWallet() {
-    const inputEl = document.getElementById("walletInput");
-    const resultEl = document.getElementById("result");
-    const raw = inputEl.value;
-    const input = raw.trim().toLowerCase();
-    inputEl.value = "";
-
-    if (!input) {
-      resultEl.innerText = "Please enter an address!";
-      resultEl.style.color = "#ffaaaa";
-      return;
-    }
-
-    if (!whitelistLoaded) {
-      resultEl.innerText = "Whitelist is still loading. Try again shortly.";
-      resultEl.style.color = "#ffdd88";
-      return;
-    }
-
-    if (whitelistSet.has(input)) {
-      resultEl.innerText = "✅ Address is whitelisted!";
-      resultEl.style.color = "#00ff88";
-    } else {
-      resultEl.innerText = "❌ Address not found in whitelist.";
-      resultEl.style.color = "#ff6688";
-    }
-  }
-
-  document.addEventListener("DOMContentLoaded", () => {
-    startFX();
-    loadWhitelist();
-    document.getElementById("walletInput").addEventListener("keydown", (e) => {
-      if (e.key === "Enter") checkWallet();
-    });
-  });
-</script>
-  
-</body>
-</html>
+      const trail = setInterval(() => {
+        const rect = sprite.getBoundingClientRect();
+        const splat = document.createElement("div");
+        splat.className = "splat";
+        splat.style.left = rect.left + rect.width / 2 + "px";
+        splat.style.top =
